@@ -1,0 +1,27 @@
+[project]
+name = "abara-file-io"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "abarabakuhatsu", email = "abarabakuhatsu@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "rich>=14.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "pyright>=1.1.400",
+    "ruff>=0.11.10",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+]
