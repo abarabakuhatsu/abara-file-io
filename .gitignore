@@ -1,8 +1,8 @@
 #   UVのpython-versionとlockファイル
 #   アプリ開発の場合はコメントアウトしたままgitで管理する。
 #   ライブラリ開発の場合は行頭の#を消してgitからの除外を有効する。
-#.python-version
-#uv.lock
+.python-version
+uv.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
