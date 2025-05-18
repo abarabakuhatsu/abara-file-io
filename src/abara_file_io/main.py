@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from logging import getLogger
 
 from logger_config import setup_logging

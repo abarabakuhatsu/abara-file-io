@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import logging
 from collections.abc import Iterable
 from types import ModuleType
