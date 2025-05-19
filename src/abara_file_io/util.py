@@ -48,7 +48,7 @@ def chack_file_exist(file_path: Path | str) -> bool:
 
 
 def check_encoding_open_file(file_path: PathLike | str) -> str | None:
-    """ファイルを開いてcchardetでエンコードを判定する
+    """ファイルを開いてchardetでエンコードを判定する
 
     Args:
         file_path (Union[PathLike, str]): 判定する文字列のパス
@@ -56,6 +56,8 @@ def check_encoding_open_file(file_path: PathLike | str) -> str | None:
     Returns:
         Optional[str]: 判定したエンコーディング
     """
+    log.debug('cardetによるエンコード判定を実行')
+
     detector = UniversalDetector()
 
     try:

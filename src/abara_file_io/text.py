@@ -7,11 +7,12 @@ from .util import check_encoding_open_file, create_file
 log = getLogger(__name__)
 
 
-def read_str_file(file_path: Path | str) -> str:
-    """第一引数で受け取ったファイルをutf-8で開く
+def read_str_file(file_path: Path | str, *, encoding: str = 'utf-8') -> str:
+    """第一引数で受け取ったパスのファイルを文字列として読み込む
 
     Args:
         file_path (Path | str): 開くファイルのパス
+        encoding (str): 読み込むファイルエンコード形式（自動推測）
 
     Returns:
         str: 読み込んだ文字列、もしファイルが読み込めない場合は空文字列を返す
@@ -19,14 +20,16 @@ def read_str_file(file_path: Path | str) -> str:
     p: Path = Path(file_path)
 
     try:
-        f: str = p.read_text(encoding='utf-8')
+        f: str = p.read_text(encoding=encoding)
     except UnicodeDecodeError:
-        log.warning(f'読み込もうとしたファイルの文字コードがUTF-8ではありません: {file_path}')
+        log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {file_path}')
         file_encoding = check_encoding_open_file(p)
 
         if file_encoding is None:
             log.warning('chardetによる文字コードの判定に失敗、読み込みできず(return empty str)')
             return ''
+
+        log.debug('文字コードを推定できたのでファイルを読み込みます')
         return p.read_text(encoding=file_encoding)
     except FileNotFoundError:
         log.warning(f'読み込もうとしたファイルが存在しません(return empty str): {file_path}')
@@ -44,7 +47,7 @@ def write_str_file(
     *,
     crlf_preservation: bool = False,
 ) -> None:
-    r"""第一引数で受け取ったパスに、第二引数で受け取った内容を書き込む。
+    r"""第一引数で受け取った内容を、第二引数で受け取ったファイルに書き込む
 
     Args:
         data (str): 書き込むデータ
@@ -63,7 +66,3 @@ def write_str_file(
             p.write_text(data, encoding='utf-8')
     except PermissionError:
         log.exception(f'書き込みファイル名が正しく指定されていません [{file_path}]')
-
-
-if __name__ == '__main__':
-    pass
