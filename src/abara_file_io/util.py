@@ -81,10 +81,14 @@ def check_encoding_open_file(file_path: PathLike | str) -> str | None:
         encoding_info['encoding'] == 'WINDOWS-1252'
         and encoding_info['confidence'] <= necessary_confidence
     ):
-        log.debug('文字数が足りずにWINDOWS-1252に誤検出した可能性が高いのでcp932に変換')
+        log.debug(
+            'サンプル文字数が足りずにWINDOWS-1252に誤検出した可能性が高いのでcp932(Windows-31J)として処理'
+        )
         return 'cp932'
     if encoding_info['encoding'] == 'SHIFT_JIS':
-        log.debug('SHIFT_JISはwindows用拡張のCP932として解釈')
+        log.debug(
+            'SHIFT_JIS(JIS X0208-1997)はWindows拡張SHIFT_JISであるCP932(Windows-31J)として処理'
+        )
         return 'cp932'
     if encoding_info['encoding']:
         return encoding_info['encoding']
