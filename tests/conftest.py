@@ -45,7 +45,7 @@ def create_sample_text_files_multiple_encodings(
     dir_path: Path = tmp_path_factory.mktemp('pytest')
     file_path: Path = dir_path / f'sample_text_{request.param}.txt'
     file_path.touch()
-    file_path.write_text(sample_str, encoding=str(request.param))
+    file_path.write_text(sample_str, encoding=str(request.param), newline='\n')
     return file_path
 
 

@@ -24,7 +24,7 @@ def test_write_str_file(tmp_path: Path, sample_str: str) -> None:
 
 @pytest.mark.parametrize(
     'create_sample_text_files_multiple_encodings',
-    [('utf-8'), ('shift_jis')],
+    [('utf_8'), ('shift_jis'), ('utf_16'), ('euc_jp')],
     indirect=['create_sample_text_files_multiple_encodings'],
 )
 def test_read_str_file_multiple_encodings(
