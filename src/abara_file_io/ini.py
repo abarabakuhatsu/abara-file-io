@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 import configparser
 from logging import getLogger
+from os import PathLike
 from pathlib import Path
+from typing import cast
+
+from abara_file_io.util import create_file
 
 log = getLogger(__name__)
 
@@ -13,34 +17,132 @@ def get_regex_setting(file_path: Path | str) -> list[str]:
         return [i.rstrip('\r\n') for i in lines]
 
 
-def read_config_file(file_path: Path | str) -> dict[str, str] | list[dict[str, str]] | None:
-    """受け取ったパスのiniを読み込み辞書として返す。
+type IniConfigValue = str | int | float | bool
+
+
+def _restore_ini_config(input_str: str) -> IniConfigValue:
+    """iniファイル化でstrに変換された値を元に戻す
 
     Args:
-        file_path (Union[Path, str]): 読み込むファイルのパス
+        input_str (str): iniから読み込んだ値
 
     Returns:
-        Union[Dict[str], List[Dict[str]], None]:
-            複数セクションの場合はlistへの入れ子辞書になるので注意
+        IniConfigValue: 修正された値
+    """
+    try:
+        return int(input_str)
+    except ValueError:
+        pass
+
+    try:
+        return float(input_str)
+    except ValueError:
+        pass
+
+    if input_str == 'True':
+        return True
+    if input_str == 'False':
+        return False
+
+    return input_str
+
+
+def _restore_ini_configs(input_dict: dict[str, str]) -> dict[str, IniConfigValue]:
+    """辞書内のvalueをini化する前の元の型に復元する
+
+    Args:
+        input_dict (dict[str, str]): iniファイルから読み込んだ辞書
+
+    Returns:
+        dict[str, IniConfigValue]: 型を修正された辞書
+    """
+    return {key: _restore_ini_config(value) for key, value in input_dict.items()}
+
+
+def read_ini_file(
+    file_path: str | PathLike[str],
+) -> dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
+    """iniを読み込み辞書として返す
+
+    iniはstr以外を扱えないので、辞書に変換する時にint,float,boolをpythonの型に変換する
+
+    Args:
+        file_path (str | PathLike[str]): _description_
+
+    Returns:
+        dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
+            IniConfigValueはstr,int,float,boolの4種類のどれか
     """
     file_path = Path(file_path)
+
+    if not file_path.exists():
+        return {}
+
     try:
         config = configparser.ConfigParser()
         config.read(filenames=file_path, encoding='utf-8')
-        log.debug(file_path)
         config_sections: list = config.sections()
-        log.debug(config_sections)
         config_result: dict = {}
         if len(config_sections) > 1:
             for i in config_sections:
-                config_result[i] = dict(config.items(i))
+                config_result[i] = _restore_ini_configs(dict(config.items(i)))
         else:
-            config_result = dict(config.items(config_sections[0]))
+            config_result = _restore_ini_configs(dict(config.items(config_sections[0])))
     except IndexError:
         log.exception(f'読み込もうとしたファイルが存在しません [{file_path}]')
-        return None
+        return {}
     else:
         return config_result
+
+
+def _correct_all_input_values(input_dict: dict) -> bool:
+    """入力された辞書のvalueが全てIniConfig = str | int | float | bool であればTrueを返す
+
+    Args:
+        input_dict (dict): 判定する辞書
+
+    Returns:
+        bool: 全てが str | int | float | bool であればTrue
+    """
+    return all(isinstance(i, (str, int, float, bool)) for i in input_dict.values())
+
+
+def write_ini_file(
+    data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
+    file_path: str | PathLike[str],
+) -> None:
+    config = configparser.ConfigParser()
+    file_path = Path(file_path)
+
+    data_values_all_dict_type: bool = all(isinstance(i, dict) for i in data.values())
+    data_values_all_ini_config_type = all(
+        _correct_all_input_values(i) for i in data.values() if isinstance(i, dict)
+    )
+
+    # 入力された辞書の構造判定
+    if data_values_all_dict_type and data_values_all_ini_config_type:
+        log.debug('multi section')
+        log.debug('Success')
+        multi_section_data = cast('dict[str, dict[str, IniConfigValue]]', data)
+        for i in multi_section_data:
+            config.add_section(i)
+            for key, value in multi_section_data[i].items():
+                config.set(i, key, str(value))
+
+    elif _correct_all_input_values(data):
+        log.debug('single section')
+        log.debug('Success')
+        config.add_section('configs')
+        for key, value in data.items():
+            config.set('configs', key, str(value))
+    else:
+        log.warning('入力された内容がini化できない形式です')
+        log.debug('Error')
+        return
+
+    create_file(file_path)
+    with Path(file_path).open(mode='w', encoding='utf-8') as config_data:
+        config.write(config_data)
 
 
 if __name__ == '__main__':

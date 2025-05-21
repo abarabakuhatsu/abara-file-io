@@ -7,6 +7,8 @@ import pytest
 
 log = getLogger()
 
+# test_str
+
 
 @pytest.fixture(scope='session')
 def sample_str() -> str:
@@ -39,3 +41,33 @@ def create_sample_text_files_multiple_encodings(
     file_path.touch()
     file_path.write_text(sample_str, encoding=str(request.param))
     return file_path
+
+
+# test_ini
+
+
+@pytest.fixture
+def ini_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
+    match request.param:
+        case 1:
+            return ({'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'}, 'Success')
+        case 2:
+            return ({'foo': 1, 'bar': 2, 'baz': 'three', 'qux': True}, 'Success')
+        case 3:
+            return (
+                {
+                    'section1': {'foo': 'one', 'bar': 2, 'baz': 'three', 'qux': True},
+                    'section2': {'foo': 1, 'bar': 'two', 'baz': 3.5, 'qux': False},
+                },
+                'Success',
+            )
+        case 4:
+            return (
+                {
+                    'section1': {'foo': {'qux': 4}, 'bar': 'two', 'baz': 'three'},
+                    'section2': {'foo': 'one', 'bar': [1, 2, 3], 'baz': 'three'},
+                },
+                'Error',
+            )
+        case _:
+            return ({}, '')
