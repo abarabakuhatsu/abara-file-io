@@ -24,6 +24,11 @@ log = getLogger(__name__)
             'error_dict',
             id='error_dict',
         ),
+        pytest.param(
+            5,
+            'empty_dict',
+            id='empty_dict',
+        ),
     ],
     indirect=['ini_dict'],
 )
@@ -55,6 +60,11 @@ def test_write_ini_file(
             4,
             'error_dict',
             id='error_dict',
+        ),
+        pytest.param(
+            5,
+            'empty_dict',
+            id='empty_dict',
         ),
     ],
     indirect=['ini_dict'],

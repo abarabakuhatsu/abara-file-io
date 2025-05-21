@@ -76,4 +76,4 @@ def ini_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
                 'Error',
             )
         case _:
-            return ({}, '')
+            return ({}, 'Error')

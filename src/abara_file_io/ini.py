@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
 from typing import cast
 
-from abara_file_io.util import create_file
+from abara_file_io.util import common_file_read_exception_handling, create_file
 
 log = getLogger(__name__)
 
@@ -74,27 +75,32 @@ def read_ini_file(
         dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
             IniConfigValueはiniに保存できるstr,int,float,boolの4種類のどれか
     """
-    file_path = Path(file_path)
 
-    if not file_path.exists():
-        return {}
-
-    try:
+    def config_read(
+        f: TextIOWrapper | BufferedReader,
+    ) -> ConfigParser:
         config = ConfigParser()
-        with file_path.open(encoding='utf-8') as f:
+        if isinstance(f, TextIOWrapper):
             config.read_file(f)
-        config_sections: list = config.sections()
-        config_result: dict = {}
-        if len(config_sections) > 1:
-            for i in config_sections:
-                config_result[i] = _restore_ini_configs(dict(config.items(i)))
-        else:
-            config_result = _restore_ini_configs(dict(config.items(config_sections[0])))
-    except IndexError:
-        log.exception(f'読み込もうとしたファイルが存在しません [{file_path}]')
-        return {}
+            return config
+        return config
+
+    config = common_file_read_exception_handling(
+        func=config_read, return_empty_value=ConfigParser(), file_path=file_path
+    )
+
+    config_sections = config.sections()
+    config_result: dict = {}
+    if len(config_sections) > 1:
+        for i in config_sections:
+            config_result[i] = _restore_ini_configs(dict(config.items(i)))
+    elif len(config_sections) == 1:
+        config_result = _restore_ini_configs(dict(config.items(config_sections[0])))
     else:
-        return config_result
+        log.warning('iniファイルのセクションが存在しません')
+        config_result = {}
+
+    return config_result
 
 
 def _correct_all_input_values(input_dict: dict) -> bool:
@@ -127,7 +133,11 @@ def _data_ini_convertible_is_decision(
     data_values_all_ini_config_type = all(
         _correct_all_input_values(i) for i in data.values() if isinstance(i, dict)
     )
-    if data_values_all_dict_type and data_values_all_ini_config_type:
+    if len(data) == 0:
+        log.warning('入力された内容が空の辞書です')
+        log.debug('Error')
+
+    elif data_values_all_dict_type and data_values_all_ini_config_type:
         log.debug('multi section')
         log.debug('Success')
         multi_section_data = cast('dict[str, dict[str, IniConfigValue]]', data)
@@ -161,5 +171,5 @@ def write_ini_file(
         return
 
     create_file(file_path)
-    with Path(file_path).open(mode='w', encoding='utf-8') as config_data:
+    with Path(file_path).open(mode='w', encoding='utf-8', newline='\n') as config_data:
         config.write(config_data)

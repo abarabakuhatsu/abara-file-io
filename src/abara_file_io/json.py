@@ -35,5 +35,5 @@ def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) 
         path (str): ファイルパス
         ensure_ascii (bool): 非ASCII文字をエスケープする('あ'→'\\u3042')
     """
-    with Path(path).open('w', encoding='utf-8') as f:
+    with Path(path).open('w', encoding='utf-8', newline='\n') as f:
         json.dump(data, f, indent=2, ensure_ascii=ensure_ascii)

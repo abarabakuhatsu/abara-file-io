@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from pathlib import Path
 
-from .util import check_encoding_open_file, create_file
+from abara_file_io.util import (
+    common_file_read_exception_handling,
+    create_file,
+)
 
 log = getLogger(__name__)
 
@@ -17,33 +21,15 @@ def read_str_file(file_path: Path | str, *, encoding: str = 'utf-8') -> str:
     Returns:
         str: 読み込んだ文字列、もしファイルが読み込めない場合は空文字列を返す
     """
-    p: Path = Path(file_path)
 
-    try:
-        with p.open(mode='r', encoding=encoding) as f:
-            read_str: str = f.read()
-    except UnicodeDecodeError:
-        log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {file_path}')
-        guess_encoding = check_encoding_open_file(p)
+    def read_text(read_text: TextIOWrapper | BufferedReader) -> str:
+        if isinstance(read_text, TextIOWrapper):
+            return read_text.read()
+        return str(read_text.read())
 
-        if guess_encoding is None:
-            log.warning('chardetによる文字コードの判定に失敗、読み込みできず(return empty str)')
-            return ''
-
-        log.debug('文字コードを推定できたのでファイルを読み込みます')
-        with p.open(mode='r', encoding=guess_encoding) as f:
-            return f.read()
-    except FileNotFoundError:
-        log.warning(f'読み込もうとしたファイルが存在しません(return empty str): {file_path}')
-        return ''
-    except PermissionError:
-        log.warning(
-            '読み込み権限がないか、ファイルへのパスが正しく指定されていません'
-            f'(return empty str): {file_path}'
-        )
-        return ''
-    else:
-        return read_str
+    return common_file_read_exception_handling(
+        func=read_text, return_empty_value='', file_path=file_path, encoding=encoding
+    )
 
 
 def write_str_file(
