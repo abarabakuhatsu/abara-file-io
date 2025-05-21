@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from abara_file_io import read_toml_file, write_toml_file
+from abara_file_io import read_toml, write_toml
 
 log = getLogger(__name__)
 
@@ -41,7 +41,7 @@ def test_write_toml(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_toml_file_{file_name}.toml'
-    write_toml_file(sample_dicts[0], file_path)
+    write_toml(sample_dicts[0], file_path)
 
     assert Path(file_path).exists()
-    assert read_toml_file(file_path) == sample_dicts[0]
+    assert read_toml(file_path) == sample_dicts[0]

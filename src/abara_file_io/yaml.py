@@ -11,7 +11,7 @@ from abara_file_io.common_io_wrapper import common_file_read_exception_handling
 log = getLogger(__name__)
 
 
-def read_yaml_file(path: str | PathLike) -> dict:
+def read_yaml(path: str | PathLike) -> dict:
     """YAMLファイルの読み込み
 
         リスト、もしくは辞書型の変数として読み込む
@@ -38,9 +38,7 @@ def read_yaml_file(path: str | PathLike) -> dict:
     )
 
 
-def write_yaml_file(
-    data: list | dict, file_path: str | PathLike, *, crlf_flag: bool = False
-) -> None:
+def write_yaml(data: list | dict, file_path: str | PathLike, *, crlf_flag: bool = False) -> None:
     """YAMLファイルとして出力する
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をYAMLとして書き込む。

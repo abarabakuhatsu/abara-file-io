@@ -9,7 +9,7 @@ from abara_file_io.util import create_file
 log = getLogger(__name__)
 
 
-def read_str_file(path: Path | str, *, encoding: str = 'utf-8') -> str:
+def read_text(path: Path | str, *, encoding: str = 'utf-8') -> str:
     """第一引数で受け取ったパスのファイルを文字列として読み込む
 
     Args:
@@ -30,7 +30,7 @@ def read_str_file(path: Path | str, *, encoding: str = 'utf-8') -> str:
     )
 
 
-def write_str_file(
+def write_text(
     data: str,
     file_path: Path | str,
     *,

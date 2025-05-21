@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from abara_file_io import read_yaml_file, write_yaml_file
+from abara_file_io import read_yaml, write_yaml
 
 log = getLogger(__name__)
 
@@ -41,7 +41,7 @@ def test_write_yaml(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_yaml_file_{file_name}.yml'
-    write_yaml_file(sample_dicts[0], file_path)
+    write_yaml(sample_dicts[0], file_path)
 
     assert Path(file_path).exists()
-    assert read_yaml_file(file_path) == sample_dicts[0]
+    assert read_yaml(file_path) == sample_dicts[0]

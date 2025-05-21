@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from abara_file_io import read_ini_file, write_ini_file
+from abara_file_io import read_ini, write_ini
 
 log = getLogger(__name__)
 
@@ -32,7 +32,7 @@ log = getLogger(__name__)
     ],
     indirect=['sample_dicts'],
 )
-def test_write_ini_file(
+def test_write_ini(
     sample_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
@@ -41,7 +41,7 @@ def test_write_ini_file(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(sample_dicts[0], file_path)
+    write_ini(sample_dicts[0], file_path)
 
     assert ('abara_file_io.ini', DEBUG, sample_dicts[1]) in caplog.record_tuples
 
@@ -69,7 +69,7 @@ def test_write_ini_file(
     ],
     indirect=['sample_dicts'],
 )
-def test_read_ini_file(
+def test_read_ini(
     sample_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
@@ -77,8 +77,8 @@ def test_read_ini_file(
 ) -> None:
     caplog.set_level(DEBUG)
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(sample_dicts[0], file_path)
-    read_file = read_ini_file(file_path)
+    write_ini(sample_dicts[0], file_path)
+    read_file = read_ini(file_path)
     if sample_dicts[1] == 'Success':
         assert sample_dicts[0] == read_file
     else:

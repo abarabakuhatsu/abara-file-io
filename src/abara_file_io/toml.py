@@ -12,7 +12,7 @@ from abara_file_io.common_io_wrapper import common_file_read_exception_handling
 log = getLogger(__name__)
 
 
-def read_toml_file(path: str | PathLike[str]) -> dict:
+def read_toml(path: str | PathLike[str]) -> dict:
     """TOMLファイルを読み込む
 
         読み込みに失敗した場合は空の辞書を返す
@@ -37,7 +37,7 @@ def read_toml_file(path: str | PathLike[str]) -> dict:
     )
 
 
-def write_toml_file(write_data: dict, file_path: str | PathLike) -> None:
+def write_toml(write_data: dict, file_path: str | PathLike) -> None:
     """TOMLとして書き込む
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をTOMLとして書き込む。

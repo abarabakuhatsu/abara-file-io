@@ -61,7 +61,7 @@ def _restore_ini_configs(input_dict: dict[str, str]) -> dict[str, IniConfigValue
     return {key: _restore_ini_config(value) for key, value in input_dict.items()}
 
 
-def read_ini_file(
+def read_ini(
     path: str | PathLike[str],
 ) -> dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
     """iniをファイルを読み込み、辞書に変換して出力する
@@ -160,7 +160,7 @@ def _data_ini_convertible_is_decision(
     return config
 
 
-def write_ini_file(
+def write_ini(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
     file_path: str | PathLike[str],
 ) -> None:
