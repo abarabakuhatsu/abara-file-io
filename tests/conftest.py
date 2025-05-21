@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
-from logging import getLogger
+from logging import WARNING, getLogger
 from pathlib import Path
 from textwrap import dedent
 
 import pytest
 
 log = getLogger()
+
+
+@pytest.fixture(autouse=True)
+def log_level_set() -> None:
+    getLogger('chardet').setLevel(WARNING)
+
 
 # test_str
 
