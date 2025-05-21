@@ -62,16 +62,17 @@ def _restore_ini_configs(input_dict: dict[str, str]) -> dict[str, IniConfigValue
 def read_ini_file(
     file_path: str | PathLike[str],
 ) -> dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
-    """iniを読み込み辞書として返す
+    """iniをファイルを読み込み、辞書に変換して出力する
 
-    iniはstr以外を扱えないので、辞書に変換する時にint,float,boolをpythonの型に変換する
+    iniはstr以外を扱えないので、辞書に変換する時に自動的にint,float,boolをpythonの型に変換する
+    ソースとなる辞書に文字列で'True'や'12.34'などを保存していた場合も、strやfloatに変換される
 
     Args:
         file_path (str | PathLike[str]): _description_
 
     Returns:
         dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
-            IniConfigValueはstr,int,float,boolの4種類のどれか
+            IniConfigValueはiniに保存できるstr,int,float,boolの4種類のどれか
     """
     file_path = Path(file_path)
 
