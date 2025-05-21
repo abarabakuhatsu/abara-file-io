@@ -52,6 +52,7 @@ def write_toml_file(write_data: dict, file_path: str | PathLike) -> None:
         write_data (dict): 書き込むデータ
         file_path (str | PathLike): 書き込むファイルのパス
     """
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
     try:
         path_obj = Path(file_path)
 

@@ -53,7 +53,7 @@ def create_sample_text_files_multiple_encodings(
 
 
 @pytest.fixture
-def create_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
+def sample_dicts(request: pytest.FixtureRequest) -> tuple[dict, str]:
     match request.param:
         case 1:
             return ({'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'}, 'Success')
@@ -71,7 +71,11 @@ def create_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
             return (
                 {
                     'section1': {'foo': {'qux': 4}, 'bar': 'two', 'baz': 'three'},
-                    'section2': {'foo': 'one', 'bar': [1, 2, 3], 'baz': 'three'},
+                    'section2': {
+                        'foo': 'one',
+                        'bar': [1, 2, 3],
+                        'baz': {'qux': 130, 'quux': 256},
+                    },
                 },
                 'Error',
             )

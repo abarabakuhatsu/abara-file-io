@@ -65,6 +65,7 @@ def write_yaml_file(
         file_path (str | PathLike): _description_
         crlf_flag (bool, optional): _description_. Defaults to False.
     """
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
     try:
         yaml = YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
