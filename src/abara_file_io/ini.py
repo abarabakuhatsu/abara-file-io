@@ -81,7 +81,8 @@ def read_ini_file(
 
     try:
         config = ConfigParser()
-        config.read(filenames=file_path, encoding='utf-8')
+        with file_path.open(encoding='utf-8') as f:
+            config.read_file(f)
         config_sections: list = config.sections()
         config_result: dict = {}
         if len(config_sections) > 1:
@@ -162,7 +163,3 @@ def write_ini_file(
     create_file(file_path)
     with Path(file_path).open(mode='w', encoding='utf-8') as config_data:
         config.write(config_data)
-
-
-if __name__ == '__main__':
-    pass
