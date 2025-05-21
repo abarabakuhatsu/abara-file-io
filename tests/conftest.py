@@ -53,7 +53,7 @@ def create_sample_text_files_multiple_encodings(
 
 
 @pytest.fixture
-def ini_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
+def create_dict(request: pytest.FixtureRequest) -> tuple[dict, str]:
     match request.param:
         case 1:
             return ({'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'}, 'Success')

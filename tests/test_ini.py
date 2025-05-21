@@ -33,7 +33,7 @@ log = getLogger(__name__)
     indirect=['ini_dict'],
 )
 def test_write_ini_file(
-    ini_dict: tuple[dict, str],
+    create_dict: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
@@ -41,9 +41,9 @@ def test_write_ini_file(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(ini_dict[0], file_path)
+    write_ini_file(create_dict[0], file_path)
 
-    assert ('abara_file_io.ini', DEBUG, ini_dict[1]) in caplog.record_tuples
+    assert ('abara_file_io.ini', DEBUG, create_dict[1]) in caplog.record_tuples
 
 
 @pytest.mark.parametrize(
@@ -70,16 +70,16 @@ def test_write_ini_file(
     indirect=['ini_dict'],
 )
 def test_read_ini_file(
-    ini_dict: tuple[dict, str],
+    create_dict: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(DEBUG)
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(ini_dict[0], file_path)
+    write_ini_file(create_dict[0], file_path)
     read_file = read_ini_file(file_path)
-    if ini_dict[1] == 'Success':
-        assert ini_dict[0] == read_file
+    if create_dict[1] == 'Success':
+        assert create_dict[0] == read_file
     else:
         assert read_file == {}
