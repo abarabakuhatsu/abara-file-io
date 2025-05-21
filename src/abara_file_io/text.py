@@ -20,25 +20,30 @@ def read_str_file(file_path: Path | str, *, encoding: str = 'utf-8') -> str:
     p: Path = Path(file_path)
 
     try:
-        f: str = p.read_text(encoding=encoding)
+        with p.open(mode='r', encoding=encoding) as f:
+            read_str: str = f.read()
     except UnicodeDecodeError:
         log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {file_path}')
-        file_encoding = check_encoding_open_file(p)
+        guess_encoding = check_encoding_open_file(p)
 
-        if file_encoding is None:
+        if guess_encoding is None:
             log.warning('chardetによる文字コードの判定に失敗、読み込みできず(return empty str)')
             return ''
 
         log.debug('文字コードを推定できたのでファイルを読み込みます')
-        return p.read_text(encoding=file_encoding)
+        with p.open(mode='r', encoding=guess_encoding) as f:
+            return f.read()
     except FileNotFoundError:
         log.warning(f'読み込もうとしたファイルが存在しません(return empty str): {file_path}')
         return ''
     except PermissionError:
-        log.warning(f'読み込みファイル名が正しく指定されていません(return empty str): {file_path}')
+        log.warning(
+            '読み込み権限がないか、ファイルへのパスが正しく指定されていません'
+            f'(return empty str): {file_path}'
+        )
         return ''
     else:
-        return f
+        return read_str
 
 
 def write_str_file(
