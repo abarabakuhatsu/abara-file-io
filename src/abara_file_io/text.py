@@ -11,24 +11,24 @@ from abara_file_io.util import (
 log = getLogger(__name__)
 
 
-def read_str_file(file_path: Path | str, *, encoding: str = 'utf-8') -> str:
+def read_str_file(path: Path | str, *, encoding: str = 'utf-8') -> str:
     """第一引数で受け取ったパスのファイルを文字列として読み込む
 
     Args:
-        file_path (Path | str): 開くファイルのパス
+        path (Path | str): 開くファイルのパス
         encoding (str): 読み込むファイルエンコード形式（自動推測）
 
     Returns:
         str: 読み込んだ文字列、もしファイルが読み込めない場合は空文字列を返す
     """
 
-    def read_text(read_text: TextIOWrapper | BufferedReader) -> str:
-        if isinstance(read_text, TextIOWrapper):
-            return read_text.read()
-        return str(read_text.read())
+    def read_text(f: TextIOWrapper | BufferedReader) -> str:
+        if isinstance(f, TextIOWrapper):
+            return f.read()
+        return str(f.read())
 
     return common_file_read_exception_handling(
-        func=read_text, return_empty_value='', file_path=file_path, encoding=encoding
+        func=read_text, return_empty_value='', file_path=path, encoding=encoding
     )
 
 

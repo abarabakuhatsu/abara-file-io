@@ -109,9 +109,13 @@ def common_file_read_exception_handling(
     file_path: str | PathLike[str],
     *,
     mode: Literal['r', 'rb'] = 'r',
-    encoding: str = 'utf-8',
+    encoding: str | None = 'utf-8',
 ) -> T:
     p = Path(file_path)
+
+    if mode == 'rb':
+        encoding = None
+
     try:
         with p.open(mode=mode, encoding=encoding) as f:
             f = cast('TextIOWrapper | BufferedReader', f)

@@ -61,7 +61,7 @@ def _restore_ini_configs(input_dict: dict[str, str]) -> dict[str, IniConfigValue
 
 
 def read_ini_file(
-    file_path: str | PathLike[str],
+    path: str | PathLike[str],
 ) -> dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
     """iniをファイルを読み込み、辞書に変換して出力する
 
@@ -69,7 +69,7 @@ def read_ini_file(
     ソースとなる辞書に文字列で'True'や'12.34'などを保存していた場合も、strやfloatに変換される
 
     Args:
-        file_path (str | PathLike[str]): _description_
+        path (str | PathLike[str]): _description_
 
     Returns:
         dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
@@ -86,7 +86,7 @@ def read_ini_file(
         return config
 
     config = common_file_read_exception_handling(
-        func=config_read, return_empty_value=ConfigParser(), file_path=file_path
+        func=config_read, return_empty_value=ConfigParser(), file_path=path
     )
 
     config_sections = config.sections()
