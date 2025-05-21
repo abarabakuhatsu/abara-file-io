@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import configparser
+from configparser import ConfigParser
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
@@ -80,7 +80,7 @@ def read_ini_file(
         return {}
 
     try:
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read(filenames=file_path, encoding='utf-8')
         config_sections: list = config.sections()
         config_result: dict = {}
@@ -108,19 +108,24 @@ def _correct_all_input_values(input_dict: dict) -> bool:
     return all(isinstance(i, (str, int, float, bool)) for i in input_dict.values())
 
 
-def write_ini_file(
+def _data_ini_convertible_is_decision(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
-    file_path: str | PathLike[str],
-) -> None:
-    config = configparser.ConfigParser()
-    file_path = Path(file_path)
+    config: ConfigParser,
+) -> ConfigParser:
+    """入力されたデータがiniに変換できるか判定してconfigparserに書き込む
 
+    Args:
+        data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]):
+            iniに書き込む辞書データ
+        config (ConfigParser): 入力されたconfigparser
+
+    Returns:
+        ConfigParser: 辞書の内容を格納したconfigparser
+    """
     data_values_all_dict_type: bool = all(isinstance(i, dict) for i in data.values())
     data_values_all_ini_config_type = all(
         _correct_all_input_values(i) for i in data.values() if isinstance(i, dict)
     )
-
-    # 入力された辞書の構造判定
     if data_values_all_dict_type and data_values_all_ini_config_type:
         log.debug('multi section')
         log.debug('Success')
@@ -139,6 +144,19 @@ def write_ini_file(
     else:
         log.warning('入力された内容がini化できない形式です')
         log.debug('Error')
+
+    return config
+
+
+def write_ini_file(
+    data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
+    file_path: str | PathLike[str],
+) -> None:
+    file_path = Path(file_path)
+
+    config = _data_ini_convertible_is_decision(data, ConfigParser())
+
+    if len(config.sections()) == 0:
         return
 
     create_file(file_path)
