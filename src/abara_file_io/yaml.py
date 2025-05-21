@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-from abara_file_io import common_file_read_exception_handling
+from abara_file_io.common_io_wrapper import common_file_read_exception_handling
 
 log = getLogger(__name__)
 
