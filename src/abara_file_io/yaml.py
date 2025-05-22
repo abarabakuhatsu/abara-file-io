@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from typing import IO, Any
@@ -29,12 +28,10 @@ def read_yaml(path: str | PathLike) -> dict:
     """
 
     def read_yaml_core(
-        f: TextIOWrapper | BufferedReader,
+        f: IO[Any],
     ) -> dict:
         yaml = YAML()
-        if isinstance(f, TextIOWrapper):
-            return yaml.load(f)
-        return {}
+        return yaml.load(f)
 
     return common_file_read_exception_handling(
         func=read_yaml_core, return_empty_value={}, path=path
@@ -55,8 +52,7 @@ def write_yaml(data: list | dict, path: str | PathLike) -> None:
         data: object,
         f: IO[Any],
     ) -> None:
-        if isinstance(f, TextIOWrapper) and isinstance(data, dict):
-            yaml.dump(data, f)
+        yaml.dump(data, f)
 
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)

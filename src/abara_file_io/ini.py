@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
-from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
@@ -73,12 +72,10 @@ def read_ini(
     """
 
     def read_ini_core(
-        f: TextIOWrapper | BufferedReader,
+        f: IO[Any],
     ) -> ConfigParser:
         config = ConfigParser()
-        if isinstance(f, TextIOWrapper):
-            config.read_file(f)
-            return config
+        config.read_file(f)
         return config
 
     config = common_file_read_exception_handling(
@@ -178,7 +175,7 @@ def write_ini(
         config: object,
         f: IO[Any],
     ) -> None:
-        if isinstance(f, TextIOWrapper) and isinstance(config, ConfigParser):
+        if isinstance(config, ConfigParser):
             config.write(f)
 
     common_file_write_exception_handling(func=write_ini_core, data=config, path=path)

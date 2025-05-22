@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from typing import IO, Any
@@ -24,11 +23,9 @@ def read_json(path: str | PathLike) -> dict:
     """
 
     def read_json_core(
-        f: TextIOWrapper | BufferedReader,
+        f: IO[Any],
     ) -> dict:
-        if isinstance(f, TextIOWrapper):
-            return json.load(f)
-        return {}
+        return json.load(f)
 
     return common_file_read_exception_handling(
         func=read_json_core, return_empty_value={}, path=path
@@ -48,7 +45,6 @@ def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) 
         data: object,
         f: IO[Any],
     ) -> None:
-        if isinstance(f, TextIOWrapper) and isinstance(data, dict):
-            json.dump(data, f, indent=2, ensure_ascii=ensure_ascii)
+        json.dump(data, f, indent=2, ensure_ascii=ensure_ascii)
 
     common_file_write_exception_handling(func=write_json_core, data=data, path=path)

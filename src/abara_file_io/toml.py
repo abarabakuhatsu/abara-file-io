@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import tomllib
-from io import BufferedReader, BufferedWriter, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from typing import IO, Any
@@ -29,11 +28,9 @@ def read_toml(path: str | PathLike[str]) -> dict:
     """
 
     def read_toml_core(
-        f: TextIOWrapper | BufferedReader,
+        f: IO[Any],
     ) -> dict:
-        if isinstance(f, BufferedReader):
-            return tomllib.load(f)
-        return {}
+        return tomllib.load(f)
 
     return common_file_read_exception_handling(
         func=read_toml_core, return_empty_value={}, path=path, mode='rb'
@@ -57,7 +54,7 @@ def write_toml(data: dict, path: str | PathLike[str]) -> None:
         data: object,
         f: IO[Any],
     ) -> None:
-        if isinstance(f, BufferedWriter) and isinstance(data, dict):
+        if isinstance(data, dict):
             tomli_w.dump(data, f)
 
     common_file_write_exception_handling(func=write_toml_core, data=data, path=path, mode='wb')

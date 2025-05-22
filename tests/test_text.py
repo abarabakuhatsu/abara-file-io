@@ -18,7 +18,7 @@ def test_read_text(create_sample_text_file: Path, sample_str: str) -> None:
 def test_write_text(tmp_path: Path, sample_str: str) -> None:
     file_path = tmp_path / 'pytest' / 'pytest_str.txt'
     write_text(sample_str, file_path)
-    read_data = file_path.read_text(encoding='utf-8')
+    read_data = file_path.read_text(encoding='utf_8')
     assert read_data == sample_str
 
 
