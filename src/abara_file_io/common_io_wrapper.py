@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 from collections.abc import Callable
-from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import IO, Any, Literal, TypeVar, cast
+from typing import IO, Any, Literal, TypeVar
 
 from ruamel.yaml.parser import ParserError
 
@@ -16,33 +15,31 @@ T = TypeVar('T')
 
 
 def common_file_read_exception_handling(
-    func: Callable[[TextIOWrapper | BufferedReader], T],
+    func: Callable[[IO[Any]], T],
     return_empty_value: T,
     path: str | PathLike[str],
     *,
     mode: Literal['r', 'rb'] = 'r',
-    encoding: str | None = 'utf-8',
 ) -> T:
     """ファイル読み込み時の汎用的な例外処理をするラッパー関数
 
     Args:
-        func (Callable[[TextIOWrapper  |  BufferedReader], T]): _description_
-        return_empty_value (T): _description_
-        path (str | PathLike[str]): _description_
-        mode (Literal['r', 'rb'], optional): _description_. Defaults to 'r'.
-        encoding (str | None, optional): _description_. Defaults to 'utf-8'.
+        func (Callable[[IO[Any]], T]): openしたファイルの読み込みをする関数
+        return_empty_value (T): 読み込み処理の失敗時に戻る値。これによって戻り値の型も決定する
+        path (str | PathLike[str]): 開くファイルのパス
+        mode (Literal['r', 'rb';], optional): 読み込むファイルを開く時のmode. Defaults to 'r'.
 
     Returns:
         T: _description_
     """
     p = Path(path)
 
+    encoding: str | None = 'utf_8'
     if mode == 'rb':
         encoding = None
 
     try:
         with p.open(mode=mode, encoding=encoding) as f:
-            f = cast('TextIOWrapper | BufferedReader', f)
             read_data: T = func(f)
     except UnicodeDecodeError:
         log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {path}')
@@ -96,11 +93,9 @@ def common_file_write_exception_handling(
             openしたファイルに対して書き込み処理をする関数
         data (T): 書き込むデータ
         path (str | PathLike[str]): 保存するファイルのパス
-        mode (Literal['w', 'wb'], optional): _description_. Defaults to 'r'.
+        mode (Literal['w', 'wb'], optional): 書き込むファイルをopenする時のmode. Defaults to 'r'.
     """
     p = Path(path)
-
-    p.parent.mkdir(parents=True, exist_ok=True)
 
     encoding = 'utf_8'
     newline = '\n'
@@ -112,6 +107,7 @@ def common_file_write_exception_handling(
         newline = None
 
     try:
+        p.parent.mkdir(parents=True, exist_ok=True)
         with Path(p).open(mode=mode, encoding=encoding, newline=newline) as f:
             func(data, f)
 
