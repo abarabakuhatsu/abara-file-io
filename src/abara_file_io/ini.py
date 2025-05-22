@@ -14,13 +14,6 @@ from abara_file_io.common_io_wrapper import (
 log = getLogger(__name__)
 
 
-def get_regex_setting(file_path: Path | str) -> list[str]:
-    # 正規表現をテキストから所得
-    p = Path(file_path)
-    with p.open(encoding='utf-8') as lines:
-        return [i.rstrip('\r\n') for i in lines]
-
-
 type IniConfigValue = str | int | float | bool
 
 

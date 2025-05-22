@@ -8,45 +8,6 @@ from chardet import UniversalDetector
 log = getLogger(__name__)
 
 
-def create_file(file_path: Path) -> None:
-    """ファイルの存在を確認し、存在しなければ作成する
-
-    Args:
-        file_path (Path): ファイルのパスオブジェクト
-    """
-    if file_path.exists():
-        return
-
-    if not file_path.parent.exists():
-        file_path.parent.mkdir(parents=True)
-
-    file_path.touch()
-    return
-
-
-def chack_file_exist(file_path: Path | str) -> bool:
-    """ファイルの存在確認
-
-    Args:
-        file_path (Union[Path, str]): 確認するファイルのパス
-
-    Returns:
-        bool: ファイルが存在し、かつ中身があればTrue
-    """
-    p: Path = Path(file_path)
-
-    file_exists = p.exists()
-
-    if file_exists and p.stat().st_size > 0:
-        log.debug(f'ファイル存在確認 : {file_path}')
-        return True
-    if file_exists:
-        log.debug(f'中身のない空のファイルです : {file_path}')
-        return False
-    log.debug(f'ファイルは存在しません : {file_path}')
-    return False
-
-
 def check_encoding_open_file(file_path: PathLike | str) -> str | None:
     """ファイルを開いてchardetでエンコードを判定する
 
