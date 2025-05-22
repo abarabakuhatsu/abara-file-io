@@ -3,7 +3,7 @@ from collections.abc import Callable
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import IO, Any, Literal, TypeVar
+from typing import IO, Any, Literal
 
 from ruamel.yaml.parser import ParserError
 
@@ -11,10 +11,8 @@ from abara_file_io.util import check_encoding_open_file
 
 log = getLogger(__name__)
 
-T = TypeVar('T')
 
-
-def common_file_read_exception_handling(
+def common_file_read_exception_handling[T](
     func: Callable[[IO[Any]], T],
     return_empty_value: T,
     path: str | PathLike[str],
@@ -34,7 +32,7 @@ def common_file_read_exception_handling(
     """
     p = Path(path)
 
-    encoding: str | None = 'utf_8'
+    encoding = 'utf_8'
     if mode == 'rb':
         encoding = None
 
