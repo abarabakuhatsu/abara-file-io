@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import cast
+from typing import IO, Any, cast
 
-from abara_file_io.util import create_file
+from abara_file_io.common_io_wrapper import (
+    common_file_read_exception_handling,
+    common_file_write_exception_handling,
+)
 
 log = getLogger(__name__)
 
@@ -59,8 +63,8 @@ def _restore_ini_configs(input_dict: dict[str, str]) -> dict[str, IniConfigValue
     return {key: _restore_ini_config(value) for key, value in input_dict.items()}
 
 
-def read_ini_file(
-    file_path: str | PathLike[str],
+def read_ini(
+    path: str | PathLike[str],
 ) -> dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
     """iniをファイルを読み込み、辞書に変換して出力する
 
@@ -68,33 +72,38 @@ def read_ini_file(
     ソースとなる辞書に文字列で'True'や'12.34'などを保存していた場合も、strやfloatに変換される
 
     Args:
-        file_path (str | PathLike[str]): _description_
+        path (str | PathLike[str]): _description_
 
     Returns:
         dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]:
             IniConfigValueはiniに保存できるstr,int,float,boolの4種類のどれか
     """
-    file_path = Path(file_path)
 
-    if not file_path.exists():
-        return {}
-
-    try:
+    def read_ini_core(
+        f: TextIOWrapper | BufferedReader,
+    ) -> ConfigParser:
         config = ConfigParser()
-        with file_path.open(encoding='utf-8') as f:
+        if isinstance(f, TextIOWrapper):
             config.read_file(f)
-        config_sections: list = config.sections()
-        config_result: dict = {}
-        if len(config_sections) > 1:
-            for i in config_sections:
-                config_result[i] = _restore_ini_configs(dict(config.items(i)))
-        else:
-            config_result = _restore_ini_configs(dict(config.items(config_sections[0])))
-    except IndexError:
-        log.exception(f'読み込もうとしたファイルが存在しません [{file_path}]')
-        return {}
+            return config
+        return config
+
+    config = common_file_read_exception_handling(
+        func=read_ini_core, return_empty_value=ConfigParser(), path=path
+    )
+
+    config_sections = config.sections()
+    config_result: dict = {}
+    if len(config_sections) > 1:
+        for i in config_sections:
+            config_result[i] = _restore_ini_configs(dict(config.items(i)))
+    elif len(config_sections) == 1:
+        config_result = _restore_ini_configs(dict(config.items(config_sections[0])))
     else:
-        return config_result
+        log.warning('iniファイルのセクションが存在しません')
+        config_result = {}
+
+    return config_result
 
 
 def _correct_all_input_values(input_dict: dict) -> bool:
@@ -111,37 +120,41 @@ def _correct_all_input_values(input_dict: dict) -> bool:
 
 def _data_ini_convertible_is_decision(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
-    config: ConfigParser,
 ) -> ConfigParser:
-    """入力されたデータがiniに変換できるか判定してconfigparserに書き込む
+    """入力されたデータをiniに変換できるか判定してconfigparserに書き込む
 
     Args:
         data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]):
             iniに書き込む辞書データ
-        config (ConfigParser): 入力されたconfigparser
 
     Returns:
         ConfigParser: 辞書の内容を格納したconfigparser
     """
+    config = ConfigParser()
+
     data_values_all_dict_type: bool = all(isinstance(i, dict) for i in data.values())
     data_values_all_ini_config_type = all(
         _correct_all_input_values(i) for i in data.values() if isinstance(i, dict)
     )
-    if data_values_all_dict_type and data_values_all_ini_config_type:
+    if len(data) == 0:
+        log.warning('入力された内容が空の辞書です')
+        log.debug('Error')
+
+    elif data_values_all_dict_type and data_values_all_ini_config_type:
         log.debug('multi section')
         log.debug('Success')
         multi_section_data = cast('dict[str, dict[str, IniConfigValue]]', data)
         for i in multi_section_data:
             config.add_section(i)
             for key, value in multi_section_data[i].items():
-                config.set(i, key, str(value))
+                config[i][key] = str(value)
 
     elif _correct_all_input_values(data):
         log.debug('single section')
         log.debug('Success')
         config.add_section('configs')
         for key, value in data.items():
-            config.set('configs', key, str(value))
+            config['configs'][key] = str(value)
     else:
         log.warning('入力された内容がini化できない形式です')
         log.debug('Error')
@@ -149,17 +162,30 @@ def _data_ini_convertible_is_decision(
     return config
 
 
-def write_ini_file(
+def write_ini(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
-    file_path: str | PathLike[str],
+    path: str | PathLike[str],
 ) -> None:
-    file_path = Path(file_path)
+    """辞書をiniファイルとして保存する
 
-    config = _data_ini_convertible_is_decision(data, ConfigParser())
+    保存できる要素は IniConfigValue = str | int | float | bool の4種類
+    それ以外の型はini化できないので、保存できない
+    Args:
+        data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]): 保存する辞書
+        path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
+    """
+    path = Path(path)
+
+    config = _data_ini_convertible_is_decision(data)
 
     if len(config.sections()) == 0:
         return
 
-    create_file(file_path)
-    with Path(file_path).open(mode='w', encoding='utf-8') as config_data:
-        config.write(config_data)
+    def write_ini_core(
+        config: object,
+        f: IO[Any],
+    ) -> None:
+        if isinstance(f, TextIOWrapper) and isinstance(config, ConfigParser):
+            config.write(f)
+
+    common_file_write_exception_handling(func=write_ini_core, data=config, path=path)

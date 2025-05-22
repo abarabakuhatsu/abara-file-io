@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from abara_file_io import read_ini_file, write_ini_file
+from abara_file_io import read_ini, write_ini
 
 log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('ini_dict', 'file_name'),
+    ('sample_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -24,11 +24,16 @@ log = getLogger(__name__)
             'error_dict',
             id='error_dict',
         ),
+        pytest.param(
+            5,
+            'empty_dict',
+            id='empty_dict',
+        ),
     ],
-    indirect=['ini_dict'],
+    indirect=['sample_dicts'],
 )
-def test_write_ini_file(
-    ini_dict: tuple[dict, str],
+def test_write_ini(
+    sample_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
@@ -36,13 +41,13 @@ def test_write_ini_file(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(ini_dict[0], file_path)
+    write_ini(sample_dicts[0], file_path)
 
-    assert ('abara_file_io.ini', DEBUG, ini_dict[1]) in caplog.record_tuples
+    assert ('abara_file_io.ini', DEBUG, sample_dicts[1]) in caplog.record_tuples
 
 
 @pytest.mark.parametrize(
-    ('ini_dict', 'file_name'),
+    ('sample_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -56,20 +61,25 @@ def test_write_ini_file(
             'error_dict',
             id='error_dict',
         ),
+        pytest.param(
+            5,
+            'empty_dict',
+            id='empty_dict',
+        ),
     ],
-    indirect=['ini_dict'],
+    indirect=['sample_dicts'],
 )
-def test_read_ini_file(
-    ini_dict: tuple[dict, str],
+def test_read_ini(
+    sample_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(DEBUG)
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini_file(ini_dict[0], file_path)
-    read_file = read_ini_file(file_path)
-    if ini_dict[1] == 'Success':
-        assert ini_dict[0] == read_file
+    write_ini(sample_dicts[0], file_path)
+    read_file = read_ini(file_path)
+    if sample_dicts[1] == 'Success':
+        assert sample_dicts[0] == read_file
     else:
         assert read_file == {}

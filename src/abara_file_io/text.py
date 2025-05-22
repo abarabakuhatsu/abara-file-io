@@ -1,73 +1,57 @@
 #!/usr/bin/env python3
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
+from os import PathLike
 from pathlib import Path
+from typing import IO, Any
 
-from .util import check_encoding_open_file, create_file
+from abara_file_io.common_io_wrapper import (
+    common_file_read_exception_handling,
+    common_file_write_exception_handling,
+)
 
 log = getLogger(__name__)
 
 
-def read_str_file(file_path: Path | str, *, encoding: str = 'utf-8') -> str:
-    """第一引数で受け取ったパスのファイルを文字列として読み込む
+def read_text(path: Path | str, *, encoding: str = 'utf-8') -> str:
+    """テキスト形式のファイルをstrとして読み込む
+
+    UTF-8以外のファイルはchardetで文字コードを自動判定する
 
     Args:
-        file_path (Path | str): 開くファイルのパス
+        path (Path | str): 開くファイルのパス
         encoding (str): 読み込むファイルエンコード形式（自動推測）
 
     Returns:
         str: 読み込んだ文字列、もしファイルが読み込めない場合は空文字列を返す
     """
-    p: Path = Path(file_path)
 
-    try:
-        with p.open(mode='r', encoding=encoding) as f:
-            read_str: str = f.read()
-    except UnicodeDecodeError:
-        log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {file_path}')
-        guess_encoding = check_encoding_open_file(p)
-
-        if guess_encoding is None:
-            log.warning('chardetによる文字コードの判定に失敗、読み込みできず(return empty str)')
-            return ''
-
-        log.debug('文字コードを推定できたのでファイルを読み込みます')
-        with p.open(mode='r', encoding=guess_encoding) as f:
+    def read_text_core(f: TextIOWrapper | BufferedReader) -> str:
+        if isinstance(f, TextIOWrapper):
             return f.read()
-    except FileNotFoundError:
-        log.warning(f'読み込もうとしたファイルが存在しません(return empty str): {file_path}')
-        return ''
-    except PermissionError:
-        log.warning(
-            '読み込み権限がないか、ファイルへのパスが正しく指定されていません'
-            f'(return empty str): {file_path}'
-        )
-        return ''
-    else:
-        return read_str
+        return str(f.read())
+
+    return common_file_read_exception_handling(
+        func=read_text_core, return_empty_value='', path=path, encoding=encoding
+    )
 
 
-def write_str_file(
-    data: str,
-    file_path: Path | str,
-    *,
-    crlf_preservation: bool = False,
-) -> None:
-    r"""第一引数で受け取った内容を、第二引数で受け取ったファイルに書き込む
+def write_text(data: str, path: str | PathLike[str]) -> None:
+    r"""strデータをファイルを書き込む
+
+    テキストファイルを標準的な UTF-8 + \n の形式で保存する
+    ただし拡張子.batと.cmdを指定した場合のみ、例外として Shift-JIS + \r\n で保存する
 
     Args:
-        data (str): 書き込むデータ
-        file_path (Path | str): 書き込むファイルのパス
-        crlf_preservation (bool, optional):
-            改行コードを\nに修正せずデフォルトを保持する. Defaults to False.
+        data (str): 書き込む文字列データ
+        path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
     """
-    p: Path = Path(file_path)
 
-    try:
-        create_file(p)
-        if crlf_preservation is False:
-            with Path(p).open(mode='w', encoding='utf-8', newline='\n') as t:
-                t.write(data)
-        else:
-            p.write_text(data, encoding='utf-8')
-    except PermissionError:
-        log.exception(f'書き込みファイル名が正しく指定されていません [{file_path}]')
+    def write_text_core(
+        data: object,
+        f: IO[Any],
+    ) -> None:
+        if isinstance(f, TextIOWrapper) and isinstance(data, str):
+            f.write(data)
+
+    common_file_write_exception_handling(func=write_text_core, data=data, path=path)

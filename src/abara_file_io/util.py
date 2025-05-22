@@ -94,7 +94,3 @@ def check_encoding_open_file(file_path: PathLike | str) -> str | None:
         return encoding_info['encoding']
     log.error(f'文字コードが判別できませんでした {file_path}')
     return None
-
-
-if __name__ == '__main__':
-    pass
