@@ -33,7 +33,7 @@ def read_toml(path: str | PathLike[str]) -> dict:
         return {}
 
     return common_file_read_exception_handling(
-        func=read_toml_core, return_empty_value={}, file_path=path, mode='rb'
+        func=read_toml_core, return_empty_value={}, path=path, mode='rb'
     )
 
 

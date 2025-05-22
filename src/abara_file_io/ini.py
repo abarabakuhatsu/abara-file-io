@@ -77,7 +77,7 @@ def read_ini(
             IniConfigValueはiniに保存できるstr,int,float,boolの4種類のどれか
     """
 
-    def config_read(
+    def read_ini_core(
         f: TextIOWrapper | BufferedReader,
     ) -> ConfigParser:
         config = ConfigParser()
@@ -87,7 +87,7 @@ def read_ini(
         return config
 
     config = common_file_read_exception_handling(
-        func=config_read, return_empty_value=ConfigParser(), file_path=path
+        func=read_ini_core, return_empty_value=ConfigParser(), path=path
     )
 
     config_sections = config.sections()

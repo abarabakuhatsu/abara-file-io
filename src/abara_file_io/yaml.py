@@ -34,7 +34,7 @@ def read_yaml(path: str | PathLike) -> dict:
         return {}
 
     return common_file_read_exception_handling(
-        func=read_yaml_core, return_empty_value={}, file_path=path
+        func=read_yaml_core, return_empty_value={}, path=path
     )
 
 

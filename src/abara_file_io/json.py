@@ -28,7 +28,7 @@ def read_json(path: str | PathLike) -> dict:
         return {}
 
     return common_file_read_exception_handling(
-        func=read_json_core, return_empty_value={}, file_path=path
+        func=read_json_core, return_empty_value={}, path=path
     )
 
 
