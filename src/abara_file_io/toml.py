@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 import tomllib
-from io import BufferedReader, TextIOWrapper
+from io import BufferedReader, BufferedWriter, TextIOWrapper
 from logging import getLogger
 from os import PathLike
-from pathlib import Path
+from typing import IO, Any
 
 import tomli_w
 
-from abara_file_io.common_io_wrapper import common_file_read_exception_handling
+from abara_file_io.common_io_wrapper import (
+    common_file_read_exception_handling,
+    common_file_write_exception_handling,
+)
 
 log = getLogger(__name__)
 
@@ -37,7 +40,7 @@ def read_toml(path: str | PathLike[str]) -> dict:
     )
 
 
-def write_toml(write_data: dict, file_path: str | PathLike) -> None:
+def write_toml(data: dict, path: str | PathLike[str]) -> None:
     """TOMLとして書き込む
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をTOMLとして書き込む。
@@ -46,14 +49,15 @@ def write_toml(write_data: dict, file_path: str | PathLike) -> None:
         保持したい場合はtomlkitを使うこと
 
     Args:
-        write_data (dict): 書き込むデータ
-        file_path (str | PathLike): 書き込むファイルのパス
+        data (dict): 書き込むデータ
+        path (str | PathLike): 書き込むファイルのパス
     """
-    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-    try:
-        path_obj = Path(file_path)
 
-        with path_obj.open(mode='wb') as toml_file:
-            tomli_w.dump(write_data, toml_file)
-    except PermissionError:
-        log.exception(f'書き込もうとしたファイルの権限がありません [{file_path}]')
+    def write_toml_core(
+        data: object,
+        f: IO[Any],
+    ) -> None:
+        if isinstance(f, BufferedWriter) and isinstance(data, dict):
+            tomli_w.dump(data, f)
+
+    common_file_write_exception_handling(func=write_toml_core, data=data, path=path, mode='wb')

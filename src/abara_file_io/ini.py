@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
-from io import BufferedReader, BufferedWriter, TextIOWrapper
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import cast
+from typing import IO, Any, cast
 
 from abara_file_io.common_io_wrapper import (
     common_file_read_exception_handling,
@@ -183,7 +183,7 @@ def write_ini(
 
     def write_ini_core(
         config: object,
-        f: TextIOWrapper | BufferedWriter,
+        f: IO[Any],
     ) -> None:
         if isinstance(f, TextIOWrapper) and isinstance(config, ConfigParser):
             config.write(f)

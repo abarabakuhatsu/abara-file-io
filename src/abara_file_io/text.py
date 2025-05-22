@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from io import BufferedReader, BufferedWriter, TextIOWrapper
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
+from typing import IO, Any
 
 from abara_file_io.common_io_wrapper import (
     common_file_read_exception_handling,
@@ -48,7 +49,7 @@ def write_text(data: str, path: str | PathLike[str]) -> None:
 
     def write_text_core(
         data: object,
-        f: TextIOWrapper | BufferedWriter,
+        f: IO[Any],
     ) -> None:
         if isinstance(f, TextIOWrapper) and isinstance(data, str):
             f.write(data)

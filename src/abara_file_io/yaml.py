@@ -2,11 +2,14 @@
 from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
-from pathlib import Path
+from typing import IO, Any
 
 from ruamel.yaml import YAML
 
-from abara_file_io.common_io_wrapper import common_file_read_exception_handling
+from abara_file_io.common_io_wrapper import (
+    common_file_read_exception_handling,
+    common_file_write_exception_handling,
+)
 
 log = getLogger(__name__)
 
@@ -38,32 +41,24 @@ def read_yaml(path: str | PathLike) -> dict:
     )
 
 
-def write_yaml(data: list | dict, file_path: str | PathLike, *, crlf_flag: bool = False) -> None:
+def write_yaml(data: list | dict, path: str | PathLike) -> None:
     """YAMLファイルとして出力する
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をYAMLとして書き込む。
 
     Args:
         data (list | dict): _description_
-        file_path (str | PathLike): _description_
-        crlf_flag (bool, optional): _description_. Defaults to False.
+        path (str | PathLike): _description_
     """
-    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-    try:
-        yaml = YAML()
-        yaml.indent(mapping=2, sequence=4, offset=2)
 
-        path_obj = Path(file_path)
+    def write_yaml_core(
+        data: object,
+        f: IO[Any],
+    ) -> None:
+        if isinstance(f, TextIOWrapper) and isinstance(data, dict):
+            yaml.dump(data, f)
 
-        if crlf_flag is False:
-            with path_obj.open(mode='w', encoding='utf-8', newline='\n') as yaml_file:
-                yaml.dump(data, yaml_file)
-        else:
-            with path_obj.open(mode='w', encoding='utf-8') as yaml_file:
-                yaml.dump(data, yaml_file)
-    except PermissionError:
-        log.exception(f'書き込みファイル名が正しく指定されていません: {file_path}')
+    yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
 
-
-if __name__ == '__main__':
-    pass
+    common_file_write_exception_handling(func=write_yaml_core, data=data, path=path)

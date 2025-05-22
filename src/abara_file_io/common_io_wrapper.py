@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from collections.abc import Callable
-from io import BufferedReader, BufferedWriter, TextIOWrapper
+from io import BufferedReader, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import Literal, TypeVar, cast
+from typing import IO, Any, Literal, TypeVar, cast
 
 from ruamel.yaml.parser import ParserError
 
@@ -29,7 +29,7 @@ def common_file_read_exception_handling(
         func (Callable[[TextIOWrapper  |  BufferedReader], T]): _description_
         return_empty_value (T): _description_
         path (str | PathLike[str]): _description_
-        mode (Literal[&#39;r&#39;, &#39;rb&#39;], optional): _description_. Defaults to 'r'.
+        mode (Literal['r', 'rb'], optional): _description_. Defaults to 'r'.
         encoding (str | None, optional): _description_. Defaults to 'utf-8'.
 
     Returns:
@@ -83,9 +83,11 @@ def common_file_read_exception_handling(
 
 
 def common_file_write_exception_handling(
-    func: Callable[[object, TextIOWrapper | BufferedWriter], None],
+    func: Callable[[object, IO[Any]], None],
     data: object,
     path: str | PathLike[str],
+    *,
+    mode: Literal['w', 'wb'] = 'w',
 ) -> None:
     """ファイル書き込み時の汎用的な例外処理をするラッパー関数
 
@@ -94,23 +96,25 @@ def common_file_write_exception_handling(
             openしたファイルに対して書き込み処理をする関数
         data (T): 書き込むデータ
         path (str | PathLike[str]): 保存するファイルのパス
+        mode (Literal['w', 'wb'], optional): _description_. Defaults to 'r'.
     """
     p = Path(path)
 
     p.parent.mkdir(parents=True, exist_ok=True)
 
-    # batファイルとcmdファイル作成時はShift-JIS + \r\nにする例外処理
-    shft_jis_crlf: bool = False
+    encoding = 'utf_8'
+    newline = '\n'
     if p.suffix in {'.bat', '.cmd'}:
-        shft_jis_crlf = True
+        encoding = 'cp932'
+        newline = '\r\n'
+    if mode == 'wb':
+        encoding = None
+        newline = None
 
     try:
-        if shft_jis_crlf is False:
-            with Path(p).open(mode='w', encoding='utf_8', newline='\n') as f:
-                func(data, f)
-        else:
-            with Path(p).open(mode='w', encoding='cp932', newline='\r\n') as f:
-                func(data, f)
+        with Path(p).open(mode=mode, encoding=encoding, newline=newline) as f:
+            func(data, f)
+
     except PermissionError:
         log.warning(f'書き込み権限がないか、ファイルへのパスが正しく指定されていません: {path}')
     except IsADirectoryError:
