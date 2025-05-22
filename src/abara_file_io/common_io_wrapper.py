@@ -83,16 +83,17 @@ def common_file_read_exception_handling(
 
 
 def common_file_write_exception_handling(
-    func: Callable[[TextIOWrapper | BufferedWriter, object], None],
+    func: Callable[[object, TextIOWrapper | BufferedWriter], None],
     data: object,
     path: str | PathLike[str],
 ) -> None:
     """ファイル書き込み時の汎用的な例外処理をするラッパー関数
 
     Args:
-        func (Callable[[TextIOWrapper  |  BufferedReader], T]): _description_
-        data (T): _description_
-        path (str | PathLike[str]): _description_
+        func (Callable[[TextIOWrapper  |  BufferedReader], T]):
+            openしたファイルに対して書き込み処理をする関数
+        data (T): 書き込むデータ
+        path (str | PathLike[str]): 保存するファイルのパス
     """
     p = Path(path)
 
@@ -106,10 +107,10 @@ def common_file_write_exception_handling(
     try:
         if shft_jis_crlf is False:
             with Path(p).open(mode='w', encoding='utf_8', newline='\n') as f:
-                func(f, data)
+                func(data, f)
         else:
             with Path(p).open(mode='w', encoding='cp932', newline='\r\n') as f:
-                func(f, data)
+                func(data, f)
     except PermissionError:
         log.warning(f'書き込み権限がないか、ファイルへのパスが正しく指定されていません: {path}')
     except IsADirectoryError:

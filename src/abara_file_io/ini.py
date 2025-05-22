@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
-from io import BufferedReader, TextIOWrapper
+from io import BufferedReader, BufferedWriter, TextIOWrapper
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
 from typing import cast
 
-from abara_file_io.common_io_wrapper import common_file_read_exception_handling
-from abara_file_io.util import create_file
+from abara_file_io.common_io_wrapper import (
+    common_file_read_exception_handling,
+    common_file_write_exception_handling,
+)
 
 log = getLogger(__name__)
 
@@ -119,7 +121,7 @@ def _correct_all_input_values(input_dict: dict) -> bool:
 def _data_ini_convertible_is_decision(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
 ) -> ConfigParser:
-    """入力されたデータがiniに変換できるか判定してconfigparserに書き込む
+    """入力されたデータをiniに変換できるか判定してconfigparserに書き込む
 
     Args:
         data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]):
@@ -164,6 +166,14 @@ def write_ini(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
     path: str | PathLike[str],
 ) -> None:
+    """辞書をiniファイルとして保存する
+
+    保存できる要素は IniConfigValue = str | int | float | bool の4種類
+    それ以外の型はini化できないので、保存できない
+    Args:
+        data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]): 保存する辞書
+        path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
+    """
     path = Path(path)
 
     config = _data_ini_convertible_is_decision(data)
@@ -171,6 +181,11 @@ def write_ini(
     if len(config.sections()) == 0:
         return
 
-    create_file(path)
-    with Path(path).open(mode='w', encoding='utf-8', newline='\n') as config_data:
-        config.write(config_data)
+    def write_ini_core(
+        config: object,
+        f: TextIOWrapper | BufferedWriter,
+    ) -> None:
+        if isinstance(f, TextIOWrapper) and isinstance(config, ConfigParser):
+            config.write(f)
+
+    common_file_write_exception_handling(func=write_ini_core, data=config, path=path)

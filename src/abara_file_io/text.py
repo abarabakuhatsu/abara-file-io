@@ -42,13 +42,13 @@ def write_text(data: str, path: str | PathLike[str]) -> None:
     ただし拡張子.batと.cmdを指定した場合のみ、例外として Shift-JIS + \r\n で保存する
 
     Args:
-        data (str): 書き込む文字列
-        path (str | PathLike[str]): 拡張子も含めて記述する
+        data (str): 書き込む文字列データ
+        path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
     """
 
     def write_text_core(
-        f: TextIOWrapper | BufferedWriter,
         data: object,
+        f: TextIOWrapper | BufferedWriter,
     ) -> None:
         if isinstance(f, TextIOWrapper) and isinstance(data, str):
             f.write(data)
