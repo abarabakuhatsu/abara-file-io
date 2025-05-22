@@ -118,18 +118,18 @@ def _correct_all_input_values(input_dict: dict) -> bool:
 
 def _data_ini_convertible_is_decision(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
-    config: ConfigParser,
 ) -> ConfigParser:
     """入力されたデータがiniに変換できるか判定してconfigparserに書き込む
 
     Args:
         data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]):
             iniに書き込む辞書データ
-        config (ConfigParser): 入力されたconfigparser
 
     Returns:
         ConfigParser: 辞書の内容を格納したconfigparser
     """
+    config = ConfigParser()
+
     data_values_all_dict_type: bool = all(isinstance(i, dict) for i in data.values())
     data_values_all_ini_config_type = all(
         _correct_all_input_values(i) for i in data.values() if isinstance(i, dict)
@@ -145,14 +145,14 @@ def _data_ini_convertible_is_decision(
         for i in multi_section_data:
             config.add_section(i)
             for key, value in multi_section_data[i].items():
-                config.set(i, key, str(value))
+                config[i][key] = str(value)
 
     elif _correct_all_input_values(data):
         log.debug('single section')
         log.debug('Success')
         config.add_section('configs')
         for key, value in data.items():
-            config.set('configs', key, str(value))
+            config['configs'][key] = str(value)
     else:
         log.warning('入力された内容がini化できない形式です')
         log.debug('Error')
@@ -162,15 +162,15 @@ def _data_ini_convertible_is_decision(
 
 def write_ini(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
-    file_path: str | PathLike[str],
+    path: str | PathLike[str],
 ) -> None:
-    file_path = Path(file_path)
+    path = Path(path)
 
-    config = _data_ini_convertible_is_decision(data, ConfigParser())
+    config = _data_ini_convertible_is_decision(data)
 
     if len(config.sections()) == 0:
         return
 
-    create_file(file_path)
-    with Path(file_path).open(mode='w', encoding='utf-8', newline='\n') as config_data:
+    create_file(path)
+    with Path(path).open(mode='w', encoding='utf-8', newline='\n') as config_data:
         config.write(config_data)
