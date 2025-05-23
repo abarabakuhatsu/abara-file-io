@@ -6,11 +6,13 @@ import pytest
 
 from abara_file_io import read_json, write_json
 
+from .common_test_data import common_params
+
 log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_ini_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -30,10 +32,10 @@ log = getLogger(__name__)
             id='empty_dict',
         ),
     ],
-    indirect=['sample_dicts'],
+    indirect=['sample_ini_dicts'],
 )
 def test_write_json(
-    sample_dicts: tuple[dict, str],
+    sample_ini_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
@@ -41,7 +43,26 @@ def test_write_json(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_json_file_{file_name}.json'
-    write_json(sample_dicts[0], file_path)
+    write_json(sample_ini_dicts[0], file_path)
 
     assert Path(file_path).exists()
-    assert read_json(file_path) == sample_dicts[0]
+    assert read_json(file_path) == sample_ini_dicts[0]
+
+
+@pytest.mark.parametrize(*common_params())
+def test_json_read_write(
+    description: str,
+    data: dict,
+    file_name: str,
+    expected: dict,
+    options: dict,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    caplog.set_level(DEBUG)
+    file_path = tmp_path / 'tmp' / f'{file_name}.json'
+
+    write_json(data=data, path=file_path)
+    result = read_json(path=file_path)
+
+    assert result == data

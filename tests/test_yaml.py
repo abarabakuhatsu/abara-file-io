@@ -10,7 +10,7 @@ log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_ini_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -30,10 +30,10 @@ log = getLogger(__name__)
             id='empty_dict',
         ),
     ],
-    indirect=['sample_dicts'],
+    indirect=['sample_ini_dicts'],
 )
 def test_write_yaml(
-    sample_dicts: tuple[dict, str],
+    sample_ini_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
@@ -41,7 +41,7 @@ def test_write_yaml(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_yaml_file_{file_name}.yml'
-    write_yaml(sample_dicts[0], file_path)
+    write_yaml(sample_ini_dicts[0], file_path)
 
     assert Path(file_path).exists()
-    assert read_yaml(file_path) == sample_dicts[0]
+    assert read_yaml(file_path) == sample_ini_dicts[0]

@@ -10,7 +10,7 @@ log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_ini_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -30,10 +30,10 @@ log = getLogger(__name__)
             id='empty_dict',
         ),
     ],
-    indirect=['sample_dicts'],
+    indirect=['sample_ini_dicts'],
 )
 def test_write_ini(
-    sample_dicts: tuple[dict, str],
+    sample_ini_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
@@ -41,13 +41,13 @@ def test_write_ini(
     caplog.set_level(DEBUG)
 
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini(sample_dicts[0], file_path)
+    write_ini(sample_ini_dicts[0], file_path)
 
-    assert ('abara_file_io.ini', DEBUG, sample_dicts[1]) in caplog.record_tuples
+    assert ('abara_file_io.ini', DEBUG, sample_ini_dicts[1]) in caplog.record_tuples
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_ini_dicts', 'file_name'),
     [
         pytest.param(1, 'flat_dict1', id='flat_dict1'),
         pytest.param(2, 'flat_dict2', id='flat_dict2'),
@@ -67,19 +67,19 @@ def test_write_ini(
             id='empty_dict',
         ),
     ],
-    indirect=['sample_dicts'],
+    indirect=['sample_ini_dicts'],
 )
 def test_read_ini(
-    sample_dicts: tuple[dict, str],
+    sample_ini_dicts: tuple[dict, str],
     file_name: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(DEBUG)
     file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini(sample_dicts[0], file_path)
+    write_ini(sample_ini_dicts[0], file_path)
     read_file = read_ini(file_path)
-    if sample_dicts[1] == 'Success':
-        assert sample_dicts[0] == read_file
+    if sample_ini_dicts[1] == 'Success':
+        assert sample_ini_dicts[0] == read_file
     else:
         assert read_file == {}
