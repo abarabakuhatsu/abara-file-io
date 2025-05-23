@@ -33,6 +33,11 @@ tasks:
       - task: install-dev
       - task: remove-unnecessary-mainpy
 
+  sync:
+    desc: 'sync all dependencies'
+    cmds:
+      - uv sync --all-groups
+
   remove-unnecessary-mainpy:
     internal: true
     cmds:
