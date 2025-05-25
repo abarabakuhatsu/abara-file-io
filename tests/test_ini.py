@@ -46,18 +46,17 @@ def test_write_ini(
 @pytest.mark.parametrize(
     ('sample_dicts'),
     [
-        pytest.param(1, id='flat_dict1'),
-        pytest.param(2, id='flat_dict2'),
+        pytest.param(1, id='flat_dict'),
         pytest.param(
-            3,
+            2,
             id='section_dict',
         ),
         pytest.param(
-            4,
+            3,
             id='error_dict',
         ),
         pytest.param(
-            5,
+            4,
             id='empty_dict',
         ),
     ],
