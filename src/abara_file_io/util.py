@@ -36,22 +36,26 @@ def check_encoding_open_file(file_path: PathLike | str) -> str | None:
     encoding_info = detector.result
     log.debug(encoding_info)
 
-    necessary_confidence: float = 0.5
+    necessary_confidence: float = 0.8
+
+    if encoding_info['encoding'] is None:
+        log.error(f'文字コードが判別できませんでした {file_path}')
+        return None
 
     if (
-        encoding_info['encoding'] == 'WINDOWS-1252'
+        encoding_info['encoding'].lower() == 'WINDOWS-1252'.lower()
         and encoding_info['confidence'] <= necessary_confidence
     ):
         log.debug(
-            'サンプル文字数が足りずにWINDOWS-1252に誤検出した可能性が高いのでcp932(Windows-31J)として処理'
+            'サンプル文字数が足りずにShift-JISをWINDOWS-1252に誤検出した可能性が高いので、Windows標準の拡張SHIFT_JISであるcp932(Windows-31J)として処理'
         )
         return 'cp932'
-    if encoding_info['encoding'] == 'SHIFT_JIS':
+
+    if encoding_info['encoding'].lower() == 'SHIFT_JIS'.lower():
         log.debug(
-            'SHIFT_JIS(JIS X0208-1997)はWindows拡張SHIFT_JISであるCP932(Windows-31J)として処理'
+            'SHIFT_JIS(JIS X0208-1997)はWindows標準の拡張SHIFT_JISである'
+            'CP932(Windows-31J)として処理'
         )
         return 'cp932'
-    if encoding_info['encoding']:
-        return encoding_info['encoding']
-    log.error(f'文字コードが判別できませんでした {file_path}')
-    return None
+
+    return encoding_info['encoding']
