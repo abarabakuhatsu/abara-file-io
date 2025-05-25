@@ -49,6 +49,19 @@ def create_sample_text_files_multiple_encodings(
     return file_path
 
 
+@pytest.fixture
+def create_sample_text_encode_false_detection(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> dict[str, str | Path]:
+    dir_path: Path = tmp_path_factory.mktemp('pytest')
+    file_path: Path = dir_path / 'sample_text_fail.txt'
+    file_path.touch()
+
+    data = 'あ'
+    file_path.write_text(data, encoding='cp932', newline='\r\n')
+    return {'data': data, 'path': file_path}
+
+
 # test_dicts
 
 

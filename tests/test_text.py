@@ -32,3 +32,10 @@ def test_read_text_multiple_encodings(
 ) -> None:
     read_data = read_text(create_sample_text_files_multiple_encodings)
     assert read_data == sample_str
+
+
+def test_encode_false_detection(
+    create_sample_text_encode_false_detection: dict[str, str | Path],
+) -> None:
+    read_data = read_text(create_sample_text_encode_false_detection['path'])
+    assert read_data == create_sample_text_encode_false_detection['data']
