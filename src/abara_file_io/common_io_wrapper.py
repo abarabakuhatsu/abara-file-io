@@ -5,11 +5,27 @@ from os import PathLike
 from pathlib import Path
 from typing import IO, Any, Literal
 
+from charset_normalizer import from_path
 from ruamel.yaml.parser import ParserError
 
-from abara_file_io.util import check_encoding_open_file
-
 log = getLogger(__name__)
+
+
+def _decision_encoding[T](func: Callable[[IO[Any]], T], path: Path) -> T | None:
+    """charset_normalizerの文字コード判定を候補順に全て試行する
+
+    Returns:
+        T | None: 呼び出し時に設定した戻り値の型
+    """
+    results = from_path(path)
+
+    for i in results:
+        try:
+            with path.open(mode='r', encoding=i.encoding) as f:
+                return func(f)
+        except UnicodeDecodeError:
+            log.debug(f'文字コード{i.encoding}での読み込み試行失敗')
+    return None
 
 
 def common_file_read_exception_handling[T](
@@ -18,6 +34,7 @@ def common_file_read_exception_handling[T](
     path: str | PathLike[str],
     *,
     mode: Literal['r', 'rb'] = 'r',
+    encoding: str | None = 'utf_8',
 ) -> T:
     """ファイル読み込み時の汎用的な例外処理をするラッパー関数
 
@@ -26,13 +43,13 @@ def common_file_read_exception_handling[T](
         return_empty_value (T): 読み込み処理の失敗時に戻る値。これによって戻り値の型も決定する
         path (str | PathLike[str]): 開くファイルのパス
         mode (Literal['r', 'rb';], optional): 読み込むファイルを開く時のmode. Defaults to 'r'.
+        encoding (str | None): 読み込む時の文字コード Defaults to 'utf_8'.
 
     Returns:
-        T: _description_
+        T: 呼び出し時にreturn_empty_valueで設定した戻り値の型
     """
     p = Path(path)
 
-    encoding = 'utf_8'
     if mode == 'rb':
         encoding = None
 
@@ -40,17 +57,14 @@ def common_file_read_exception_handling[T](
         with p.open(mode=mode, encoding=encoding) as f:
             read_data: T = func(f)
     except UnicodeDecodeError:
-        log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {path}')
-        guess_encoding = check_encoding_open_file(p)
+        result = _decision_encoding(func=func, path=p)
 
-        if isinstance(guess_encoding, str):
-            log.debug('文字コードを推定できたのでファイルを読み込みます')
-            with p.open(mode='r', encoding=guess_encoding) as f:
-                return func(f)
+        if result is not None:
+            return result
 
         log.warning(
-            'chardetによる文字コードの判定に失敗、読み込みできず'
-            f'(return empty {type(return_empty_value)})'
+            '読み込もうとしたファイルの文字コードが{encoding}ではなかった為、charset-normalizerを使い文字コードの判定を試みましたが失敗しました'
+            f'(return empty {type(return_empty_value)}: {path})'
         )
     except FileNotFoundError:
         log.warning(
