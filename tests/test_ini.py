@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from logging import DEBUG, getLogger
+from logging import getLogger
 from pathlib import Path
 
 import pytest
@@ -10,76 +10,74 @@ log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_dicts'),
     [
-        pytest.param(1, 'flat_dict1', id='flat_dict1'),
-        pytest.param(2, 'flat_dict2', id='flat_dict2'),
+        pytest.param(1, id='flat_dict1'),
+        pytest.param(2, id='flat_dict2'),
         pytest.param(
             3,
-            'section_dict',
             id='section_dict',
         ),
         pytest.param(
             4,
-            'error_dict',
             id='error_dict',
         ),
         pytest.param(
             5,
-            'empty_dict',
             id='empty_dict',
         ),
     ],
     indirect=['sample_dicts'],
 )
 def test_write_ini(
-    sample_dicts: tuple[dict, str],
-    file_name: str,
+    sample_dicts: dict[str, dict | str],
     tmp_path: Path,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    caplog.set_level(DEBUG)
+    file_path = tmp_path / 'tmp' / f'test_ini_file_{sample_dicts["name"]}.ini'
 
-    file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini(sample_dicts[0], file_path)
+    data = {}
+    if isinstance(sample_dicts['data'], dict):
+        data = sample_dicts['data']
 
-    assert ('abara_file_io.ini', DEBUG, sample_dicts[1]) in caplog.record_tuples
+    result = write_ini(data, file_path)
+
+    assert result == sample_dicts['ini_expected']
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_dicts'),
     [
-        pytest.param(1, 'flat_dict1', id='flat_dict1'),
-        pytest.param(2, 'flat_dict2', id='flat_dict2'),
+        pytest.param(1, id='flat_dict1'),
+        pytest.param(2, id='flat_dict2'),
         pytest.param(
             3,
-            'section_dict',
             id='section_dict',
         ),
         pytest.param(
             4,
-            'error_dict',
             id='error_dict',
         ),
         pytest.param(
             5,
-            'empty_dict',
             id='empty_dict',
         ),
     ],
     indirect=['sample_dicts'],
 )
 def test_read_ini(
-    sample_dicts: tuple[dict, str],
-    file_name: str,
+    sample_dicts: dict[str, dict | str],
     tmp_path: Path,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    caplog.set_level(DEBUG)
-    file_path = tmp_path / 'tmp' / f'test_ini_file_{file_name}.ini'
-    write_ini(sample_dicts[0], file_path)
-    read_file = read_ini(file_path)
-    if sample_dicts[1] == 'Success':
-        assert sample_dicts[0] == read_file
+    file_path = tmp_path / 'tmp' / f'test_ini_file_{sample_dicts["name"]}.ini'
+
+    data = {}
+    if isinstance(sample_dicts['data'], dict):
+        data = sample_dicts['data']
+
+    write_ini(data, file_path)
+    read_data = read_ini(file_path)
+
+    if sample_dicts['ini_expected']:
+        assert data == read_data
     else:
-        assert read_file == {}
+        assert read_data == {}

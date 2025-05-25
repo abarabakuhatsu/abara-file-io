@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from logging import DEBUG, getLogger
+from logging import getLogger
 from pathlib import Path
 
 import pytest
@@ -10,38 +10,37 @@ log = getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    ('sample_dicts', 'file_name'),
+    ('sample_dicts'),
     [
-        pytest.param(1, 'flat_dict1', id='flat_dict1'),
-        pytest.param(2, 'flat_dict2', id='flat_dict2'),
+        pytest.param(1, id='flat_dict1'),
+        pytest.param(2, id='flat_dict2'),
         pytest.param(
             3,
-            'section_dict',
-            id='section_dict',
+            id='section_dict1',
         ),
         pytest.param(
             4,
-            'nest_dict',
-            id='nest_dict',
+            id='section_dict2',
         ),
         pytest.param(
             5,
-            'empty_dict',
             id='empty_dict',
         ),
     ],
     indirect=['sample_dicts'],
 )
-def test_write_json(
-    sample_dicts: tuple[dict, str],
-    file_name: str,
+def test_json_read_write(
+    sample_dicts: dict[str, dict | str | bool],
     tmp_path: Path,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    caplog.set_level(DEBUG)
+    file_path = tmp_path / 'tmp' / f'{sample_dicts["name"]}.json'
 
-    file_path = tmp_path / 'tmp' / f'test_json_file_{file_name}.json'
-    write_json(sample_dicts[0], file_path)
+    data = {}
+    if isinstance(sample_dicts['data'], dict):
+        data = sample_dicts['data']
 
-    assert Path(file_path).exists()
-    assert read_json(file_path) == sample_dicts[0]
+    write_json(data=data, path=file_path)
+    response = read_json(path=file_path)
+
+    assert file_path.exists()
+    assert response == data

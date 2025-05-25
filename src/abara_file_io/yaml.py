@@ -38,14 +38,17 @@ def read_yaml(path: str | PathLike) -> dict:
     )
 
 
-def write_yaml(data: list | dict, path: str | PathLike) -> None:
+def write_yaml(data: list | dict, path: str | PathLike) -> bool:
     """YAMLファイルとして出力する
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をYAMLとして書き込む。
 
     Args:
-        data (list | dict): _description_
-        path (str | PathLike): _description_
+        data (dict): yamlに書き込む辞書オブジェクト
+        path (str | PathLike): 保存するファイルパス、ファイル名の拡張子まで記入
+
+    Returns:
+        bool: ファイルの保存に成功したらTrue、失敗したらFalse
     """
 
     def write_yaml_core(
@@ -57,4 +60,4 @@ def write_yaml(data: list | dict, path: str | PathLike) -> None:
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
 
-    common_file_write_exception_handling(func=write_yaml_core, data=data, path=path)
+    return common_file_write_exception_handling(func=write_yaml_core, data=data, path=path)
