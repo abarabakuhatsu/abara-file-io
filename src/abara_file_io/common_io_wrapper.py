@@ -5,10 +5,27 @@ from os import PathLike
 from pathlib import Path
 from typing import IO, Any, Literal
 
-from charset_normalizer import detect
+from charset_normalizer import from_path
 from ruamel.yaml.parser import ParserError
 
 log = getLogger(__name__)
+
+
+def _decision_encoding[T](func: Callable[[IO[Any]], T], path: Path) -> T | None:
+    """charset_normalizerの文字コード判定を候補順に全て試行する
+
+    Returns:
+        T | None: 呼び出し時に設定した戻り値の型
+    """
+    results = from_path(path)
+
+    for i in results:
+        try:
+            with path.open(mode='r', encoding=i.encoding) as f:
+                return func(f)
+        except UnicodeDecodeError:
+            log.debug(f'文字コード{i.encoding}での読み込み試行失敗')
+    return None
 
 
 def common_file_read_exception_handling[T](
@@ -29,7 +46,7 @@ def common_file_read_exception_handling[T](
         encoding (str | None): 読み込む時の文字コード Defaults to 'utf_8'.
 
     Returns:
-        T: _description_
+        T: 呼び出し時にreturn_empty_valueで設定した戻り値の型
     """
     p = Path(path)
 
@@ -40,20 +57,14 @@ def common_file_read_exception_handling[T](
         with p.open(mode=mode, encoding=encoding) as f:
             read_data: T = func(f)
     except UnicodeDecodeError:
-        log.debug(f'読み込もうとしたファイルの文字コードが{encoding}ではありませんでした: {path}')
+        result = _decision_encoding(func=func, path=p)
 
-        with p.open(mode='rb') as f:
-            binary = f.read()
-
-        guess_encode = detect(binary)
-
-        if guess_encode['encoding'] is not None:
-            with p.open(mode='r', encoding=guess_encode['encoding']) as f:
-                return func(f)
+        if result is not None:
+            return result
 
         log.warning(
-            'charset-normalizerによる文字コードの判定に失敗、ファイルを読み込みに失敗しました'
-            f'(return empty {type(return_empty_value)})'
+            '読み込もうとしたファイルの文字コードが{encoding}ではなかった為、charset-normalizerを使い文字コードの判定を試みましたが失敗しました'
+            f'(return empty {type(return_empty_value)}: {path})'
         )
     except FileNotFoundError:
         log.warning(

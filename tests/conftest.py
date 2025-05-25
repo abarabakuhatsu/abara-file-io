@@ -41,7 +41,6 @@ def create_sample_text_file(tmp_path_factory: pytest.TempPathFactory, sample_str
 def create_sample_text_files_multiple_encodings(
     tmp_path_factory: pytest.TempPathFactory, sample_str: str, request: pytest.FixtureRequest
 ) -> Path:
-    log.info(f'{request.param}')
     dir_path: Path = tmp_path_factory.mktemp('pytest')
     file_path: Path = dir_path / f'sample_text_{request.param}.txt'
     file_path.touch()
