@@ -5,9 +5,8 @@ from os import PathLike
 from pathlib import Path
 from typing import IO, Any, Literal
 
+from charset_normalizer import detect
 from ruamel.yaml.parser import ParserError
-
-from abara_file_io.util import check_encoding_open_file
 
 log = getLogger(__name__)
 
@@ -18,6 +17,7 @@ def common_file_read_exception_handling[T](
     path: str | PathLike[str],
     *,
     mode: Literal['r', 'rb'] = 'r',
+    encoding: str | None = 'utf_8',
 ) -> T:
     """ファイル読み込み時の汎用的な例外処理をするラッパー関数
 
@@ -26,13 +26,13 @@ def common_file_read_exception_handling[T](
         return_empty_value (T): 読み込み処理の失敗時に戻る値。これによって戻り値の型も決定する
         path (str | PathLike[str]): 開くファイルのパス
         mode (Literal['r', 'rb';], optional): 読み込むファイルを開く時のmode. Defaults to 'r'.
+        encoding (str | None): 読み込む時の文字コード Defaults to 'utf_8'.
 
     Returns:
         T: _description_
     """
     p = Path(path)
 
-    encoding = 'utf_8'
     if mode == 'rb':
         encoding = None
 
@@ -40,16 +40,19 @@ def common_file_read_exception_handling[T](
         with p.open(mode=mode, encoding=encoding) as f:
             read_data: T = func(f)
     except UnicodeDecodeError:
-        log.debug(f'読み込もうとしたファイルの文字コードがUTF-8ではありませんでした: {path}')
-        guess_encoding = check_encoding_open_file(p)
+        log.debug(f'読み込もうとしたファイルの文字コードが{encoding}ではありませんでした: {path}')
 
-        if isinstance(guess_encoding, str):
-            log.debug('文字コードを推定できたのでファイルを読み込みます')
-            with p.open(mode='r', encoding=guess_encoding) as f:
+        with p.open(mode='rb') as f:
+            binary = f.read()
+
+        guess_encode = detect(binary)
+
+        if guess_encode['encoding'] is not None:
+            with p.open(mode='r', encoding=guess_encode['encoding']) as f:
                 return func(f)
 
         log.warning(
-            'chardetによる文字コードの判定に失敗、読み込みできず'
+            'charset-normalizerによる文字コードの判定に失敗、ファイルを読み込みに失敗しました'
             f'(return empty {type(return_empty_value)})'
         )
     except FileNotFoundError:

@@ -39,3 +39,10 @@ def test_encode_false_detection(
 ) -> None:
     read_data = read_text(create_sample_text_encode_false_detection['path'])
     assert read_data == create_sample_text_encode_false_detection['data']
+
+
+def test_bat_file(tmp_path: Path, sample_str: str) -> None:
+    file_path = tmp_path / 'pytest' / 'pytest_bat.bat'
+    write_text(sample_str, file_path)
+    read_data = read_text(file_path)
+    assert read_data == sample_str
