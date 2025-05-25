@@ -83,7 +83,7 @@ def common_file_write_exception_handling(
     path: str | PathLike[str],
     *,
     mode: Literal['w', 'wb'] = 'w',
-) -> None:
+) -> bool:
     """ファイル書き込み時の汎用的な例外処理をするラッパー関数
 
     Args:
@@ -92,6 +92,9 @@ def common_file_write_exception_handling(
         data (T): 書き込むデータ
         path (str | PathLike[str]): 保存するファイルのパス
         mode (Literal['w', 'wb'], optional): 書き込むファイルをopenする時のmode. Defaults to 'r'.
+
+    Returns:
+        bool: 処理の成功失敗の判定のための戻り値
     """
     p = Path(path)
 
@@ -104,14 +107,19 @@ def common_file_write_exception_handling(
         encoding = None
         newline = None
 
+    result: bool = False
+
     try:
         p.parent.mkdir(parents=True, exist_ok=True)
         with Path(p).open(mode=mode, encoding=encoding, newline=newline) as f:
             func(data, f)
-
     except PermissionError:
         log.warning(f'書き込み権限がないか、ファイルへのパスが正しく指定されていません: {path}')
     except IsADirectoryError:
         log.warning(f'書き込もうとしたパスがディレクトリを指しています: {path}')
     except OSError:
         log.warning(f'OSで問題が発生しました: {path}')
+    else:
+        result = True
+
+    return result
