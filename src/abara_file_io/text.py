@@ -34,7 +34,7 @@ def read_text(path: Path | str) -> str:
     )
 
 
-def write_text(data: str, path: str | PathLike[str]) -> None:
+def write_text(data: str, path: str | PathLike[str]) -> bool:
     r"""strデータをファイルを書き込む
 
     テキストファイルを標準的な UTF-8 + \n の形式で保存する
@@ -43,6 +43,9 @@ def write_text(data: str, path: str | PathLike[str]) -> None:
     Args:
         data (str): 書き込む文字列データ
         path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
+
+    Returns:
+        bool: ファイルの保存に成功したらTrue、失敗したらFalse
     """
 
     def write_text_core(
@@ -51,4 +54,4 @@ def write_text(data: str, path: str | PathLike[str]) -> None:
     ) -> None:
         f.write(data)
 
-    common_file_write_exception_handling(func=write_text_core, data=data, path=path)
+    return common_file_write_exception_handling(func=write_text_core, data=data, path=path)
