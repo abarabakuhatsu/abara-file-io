@@ -57,32 +57,25 @@ def sample_dicts(request: pytest.FixtureRequest) -> dict[str, dict | str | bool]
     match request.param:
         case 1:
             return {
-                'data': {'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'},
-                'name': 'flat_dict1',
+                'data': {'foo': 1, 'bar': 2.236, 'baz': 'three', 'qux': True},
+                'name': 'flat_dict',
                 'expected': True,
                 'ini_expected': True,
             }
         case 2:
             return {
-                'data': {'foo': 1, 'bar': 2, 'baz': 'three', 'qux': True},
-                'name': 'flat_dict2',
+                'data': {
+                    'section1': {'foo': 'one', 'bar': 2.828, 'baz': 'three', 'qux': True},
+                    'section2': {'foo': 1.732, 'bar': 'two', 'baz': 3, 'qux': False},
+                },
+                'name': 'section_dict1',
                 'expected': True,
                 'ini_expected': True,
             }
         case 3:
             return {
                 'data': {
-                    'section1': {'foo': 'one', 'bar': 2, 'baz': 'three', 'qux': True},
-                    'section2': {'foo': 1, 'bar': 'two', 'baz': 3.5, 'qux': False},
-                },
-                'name': 'section_dict1',
-                'expected': True,
-                'ini_expected': True,
-            }
-        case 4:
-            return {
-                'data': {
-                    'section1': {'foo': {'qux': 4}, 'bar': 'two', 'baz': 'three'},
+                    'section1': {'foo': {'qux': 4}, 'bar': 'two', 'baz': 3.14},
                     'section2': {
                         'foo': 'one',
                         'bar': [1, 2, 3],
