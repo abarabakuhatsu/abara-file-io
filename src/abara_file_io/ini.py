@@ -128,11 +128,9 @@ def _data_ini_convertible_is_decision(
     )
     if len(data) == 0:
         log.warning('入力された内容が空の辞書です')
-        log.debug('Error')
 
     elif data_values_all_dict_type and data_values_all_ini_config_type:
         log.debug('multi section')
-        log.debug('Success')
         multi_section_data = cast('dict[str, dict[str, IniConfigValue]]', data)
         for i in multi_section_data:
             config.add_section(i)
@@ -141,13 +139,11 @@ def _data_ini_convertible_is_decision(
 
     elif _correct_all_input_values(data):
         log.debug('single section')
-        log.debug('Success')
         config.add_section('configs')
         for key, value in data.items():
             config['configs'][key] = str(value)
     else:
         log.warning('入力された内容がini化できない形式です')
-        log.debug('Error')
 
     return config
 
@@ -155,21 +151,25 @@ def _data_ini_convertible_is_decision(
 def write_ini(
     data: dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]],
     path: str | PathLike[str],
-) -> None:
+) -> bool:
     """辞書をiniファイルとして保存する
 
     保存できる要素は IniConfigValue = str | int | float | bool の4種類
-    それ以外の型はini化できないので、保存できない
+    それ以外のSequence型はiniでは保存できない
     Args:
-        data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]): 保存する辞書
-        path (str | PathLike[str]): 保存するファイルのパス（拡張子まで記述）
+        data (dict[str, IniConfigValue] | dict[str, dict[str, IniConfigValue]]):
+            iniに書き込む辞書オブジェクト
+        path (str | PathLike[str]): 保存するファイルパス、ファイル名の拡張子まで記入
+
+    Returns:
+        bool: ファイルの保存に成功したらTrue、失敗したらFalse
     """
     path = Path(path)
 
     config = _data_ini_convertible_is_decision(data)
 
     if len(config.sections()) == 0:
-        return
+        return False
 
     def write_ini_core(
         config: object,
@@ -178,4 +178,4 @@ def write_ini(
         if isinstance(config, ConfigParser):
             config.write(f)
 
-    common_file_write_exception_handling(func=write_ini_core, data=config, path=path)
+    return common_file_write_exception_handling(func=write_ini_core, data=config, path=path)

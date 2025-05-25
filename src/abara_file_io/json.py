@@ -32,13 +32,16 @@ def read_json(path: str | PathLike) -> dict:
     )
 
 
-def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) -> None:
+def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) -> bool:
     r"""jsonファイルを書き込む
 
     Args:
         data (dict): jsonに書き込む辞書オブジェクト
-        path (str): ファイルパス
+        path (str | PathLike): 保存するファイルパス、ファイル名の拡張子まで記入
         ensure_ascii (bool): 非ASCII文字をエスケープする('あ'→'\\u3042')
+
+    Returns:
+        bool: ファイルの保存に成功したらTrue、失敗したらFalse
     """
 
     def write_json_core(
@@ -47,4 +50,4 @@ def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) 
     ) -> None:
         json.dump(data, f, indent=2, ensure_ascii=ensure_ascii)
 
-    common_file_write_exception_handling(func=write_json_core, data=data, path=path)
+    return common_file_write_exception_handling(func=write_json_core, data=data, path=path)

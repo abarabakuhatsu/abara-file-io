@@ -49,27 +49,39 @@ def create_sample_text_files_multiple_encodings(
     return file_path
 
 
-# test_ini
+# test_dicts
 
 
 @pytest.fixture
-def sample_ini_dicts(request: pytest.FixtureRequest) -> tuple[dict, str]:
+def sample_dicts(request: pytest.FixtureRequest) -> dict[str, dict | str | bool]:
     match request.param:
         case 1:
-            return ({'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'}, 'Success')
+            return {
+                'data': {'foo': 'a', 'bar': 'b', 'baz': 'c', 'qux': 'd'},
+                'name': 'flat_dict1',
+                'expected': True,
+                'ini_expected': True,
+            }
         case 2:
-            return ({'foo': 1, 'bar': 2, 'baz': 'three', 'qux': True}, 'Success')
+            return {
+                'data': {'foo': 1, 'bar': 2, 'baz': 'three', 'qux': True},
+                'name': 'flat_dict2',
+                'expected': True,
+                'ini_expected': True,
+            }
         case 3:
-            return (
-                {
+            return {
+                'data': {
                     'section1': {'foo': 'one', 'bar': 2, 'baz': 'three', 'qux': True},
                     'section2': {'foo': 1, 'bar': 'two', 'baz': 3.5, 'qux': False},
                 },
-                'Success',
-            )
+                'name': 'section_dict1',
+                'expected': True,
+                'ini_expected': True,
+            }
         case 4:
-            return (
-                {
+            return {
+                'data': {
                     'section1': {'foo': {'qux': 4}, 'bar': 'two', 'baz': 'three'},
                     'section2': {
                         'foo': 'one',
@@ -77,7 +89,9 @@ def sample_ini_dicts(request: pytest.FixtureRequest) -> tuple[dict, str]:
                         'baz': {'qux': 130, 'quux': 256},
                     },
                 },
-                'Error',
-            )
+                'name': 'section_dict2',
+                'expected': True,
+                'ini_expected': False,
+            }
         case _:
-            return ({}, 'Error')
+            return {'data': {}, 'name': 'Empty_Dict', 'expected': False, 'ini_expected': False}

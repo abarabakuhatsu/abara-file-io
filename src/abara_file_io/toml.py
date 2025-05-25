@@ -37,7 +37,7 @@ def read_toml(path: str | PathLike[str]) -> dict:
     )
 
 
-def write_toml(data: dict, path: str | PathLike[str]) -> None:
+def write_toml(data: dict, path: str | PathLike[str]) -> bool:
     """TOMLとして書き込む
 
         第一引数で受け取ったパスに、第二引数で受け取った内容をTOMLとして書き込む。
@@ -46,8 +46,11 @@ def write_toml(data: dict, path: str | PathLike[str]) -> None:
         保持したい場合はtomlkitを使うこと
 
     Args:
-        data (dict): 書き込むデータ
-        path (str | PathLike): 書き込むファイルのパス
+        data (dict): tomlに書き込む辞書オブジェクト
+        path (str | PathLike): 保存するファイルパス、ファイル名の拡張子まで記入
+
+    Returns:
+        bool: ファイルの保存に成功したらTrue、失敗したらFalse
     """
 
     def write_toml_core(
@@ -57,4 +60,6 @@ def write_toml(data: dict, path: str | PathLike[str]) -> None:
         if isinstance(data, dict):
             tomli_w.dump(data, f)
 
-    common_file_write_exception_handling(func=write_toml_core, data=data, path=path, mode='wb')
+    return common_file_write_exception_handling(
+        func=write_toml_core, data=data, path=path, mode='wb'
+    )
