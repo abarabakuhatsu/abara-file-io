@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from logging import getLogger
 from os import PathLike
-from pathlib import Path
 from typing import IO, Any
 
 from abara_file_io.common_io_wrapper import (
@@ -12,7 +11,7 @@ from abara_file_io.common_io_wrapper import (
 log = getLogger(__name__)
 
 
-def read_text(path: Path | str) -> str:
+def read_text(path: str | PathLike[str]) -> str:
     """テキスト形式のファイルをstrとして読み込む
 
     UTF-8以外のファイルはchardetで文字コードを自動判定する

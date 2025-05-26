@@ -12,7 +12,7 @@ from abara_file_io.common_io_wrapper import (
 log = getLogger(__name__)
 
 
-def read_json(path: str | PathLike) -> dict:
+def read_json(path: str | PathLike[str]) -> dict:
     """jsonファイルを読み込む
 
     Args:
@@ -32,7 +32,7 @@ def read_json(path: str | PathLike) -> dict:
     )
 
 
-def write_json(data: dict, path: str | PathLike, *, ensure_ascii: bool = False) -> bool:
+def write_json(data: dict, path: str | PathLike[str], *, ensure_ascii: bool = False) -> bool:
     r"""jsonファイルを書き込む
 
     Args:
