@@ -1,4 +1,4 @@
-# Python Starter Template
+# Abara File IO
 
 <p>
 <img src="https://img.shields.io/badge/-Python-ffd448.svg?logo=python&style=flat">
@@ -46,7 +46,7 @@ yaml_response: dict = read_yaml(path)
 toml_response: dict = read_toml(path)
 ```
 
-読み込みは第1引数にファイルのパス（strか、pathlibのPathオブジェクト）を指定するだけで動作する。
+読み込みは第1引数にファイルのパス（ `str` か、pathlibの `Path` オブジェクト）を指定するだけで動作する。
 
 エンコードは最初に `UTF-8` を試し、違った場合はcharset\-normalizerで自動的に判定して読み込むので煩わされる必要がない。
 
@@ -78,9 +78,9 @@ write_toml(dict_data, path)
 ```
 
 書き込みは第1引数に書き込むオブジェクト。  
-第2引数に保存するファイル拡張子まで含めたパス（strか、pathlibのPathオブジェクト）を入れる。
+第2引数に保存するファイル拡張子まで含めたパス（ `str` か、pathlibの `Path` オブジェクト）を入れる。
 
-常に文字コードUTF-8、改行コード\nで保存されるのでWindowsユーザーも安心。  
+常に文字コード `UTF-8` 、改行コード `\n` で保存されるのでWindowsで指定を忘れてしまうことがなく安全。  
 拡張子を `.bat` と `.cmd` にした場合のみ、 `UTF-8` では動作しないため自動的にShift-JIS（ `CP932` ）と `\r\n` で保存される。
 
 書き込みに失敗してもエラーで停止しない仕様。  
