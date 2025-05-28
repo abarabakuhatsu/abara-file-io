@@ -3,7 +3,7 @@ from collections.abc import Callable
 from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import IO, Any, Literal
+from typing import IO, Any, Literal, TypeVar
 
 from charset_normalizer import from_path
 from ruamel.yaml.parser import ParserError
@@ -11,7 +11,10 @@ from ruamel.yaml.parser import ParserError
 log = getLogger(__name__)
 
 
-def _decision_encoding[T](func: Callable[[IO[Any]], T], path: Path) -> T | None:
+T = TypeVar('T', bound=object)
+
+
+def _decision_encoding(func: Callable[[IO[Any]], T], path: Path) -> T | None:
     """charset_normalizerの文字コード判定を候補順に全て試行する
 
     Returns:
@@ -28,7 +31,7 @@ def _decision_encoding[T](func: Callable[[IO[Any]], T], path: Path) -> T | None:
     return None
 
 
-def common_file_read_exception_handling[T](
+def common_file_read_exception_handling(
     func: Callable[[IO[Any]], T],
     return_empty_value: T,
     path: str | PathLike[str],
