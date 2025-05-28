@@ -51,6 +51,8 @@ ignore = [
     'COM819', # 不必要な末尾のカンマを禁止（prohibited-trailing-comma）
     'ISC001', # 一行の中での暗黙的な文字列の連結を禁止（single-line-implicit-string-concatenation）
     'ISC002', # 複数行の中での暗黙的な文字列の連結を禁止（multi-line-implicit-string-concatenation）
+    # Github ActionsでLinux実行時にエラーになるので追加
+    'EXE',
     # 作業中のみ追加
     'ERA001',
 ]

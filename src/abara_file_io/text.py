@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from logging import getLogger
 from os import PathLike
 from typing import IO, Any

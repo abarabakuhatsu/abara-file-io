@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from configparser import ConfigParser
 from logging import getLogger
 from os import PathLike

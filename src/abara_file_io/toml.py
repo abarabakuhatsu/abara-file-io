@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import tomllib
 from logging import getLogger
 from os import PathLike
