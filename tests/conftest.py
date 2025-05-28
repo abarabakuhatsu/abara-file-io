@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from logging import WARNING, getLogger
 from pathlib import Path
 from textwrap import dedent
