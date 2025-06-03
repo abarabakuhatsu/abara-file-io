@@ -103,7 +103,7 @@ def common_file_write_exception_handling(
     """ファイル書き込み時の汎用的な例外処理をするラッパー関数
 
     Args:
-        func (Callable[[TextIOWrapper  |  BufferedReader], T]):
+        func (Callable[[object, IO[Any]], None]):
             openしたファイルに対して書き込み処理をする関数
         data (T): 書き込むデータ
         path (str | PathLike[str]): 保存するファイルのパス
