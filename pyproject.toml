@@ -1,6 +1,6 @@
 [project]
 name = "abara-file-io"
-version = "0.1.0"
+dynamic = ["version"]
 description = "This is a library that reads and writes Python local files in the most efficient way possible, without the need for detailed configuration."
 readme = "README.md"
 authors = [{ name = "abara", email = "abarabakuhatsu@gmail.com" }]
@@ -12,8 +12,11 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
 [dependency-groups]
 dev = ["pre-commit>=4.2.0", "pyright>=1.1.400", "ruff>=0.11.10"]
