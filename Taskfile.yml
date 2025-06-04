@@ -47,11 +47,15 @@ tasks:
   test-pypi-publish:
     desc: 'publish to test.pypi.org'
     prompt: 'Is it okay to publish this project to test.pypi.org?'
+    dotenv: ['.env']
     cmds:
-      - uv publish --publish-url https://test.pypi.org/legacy/ --env-file .env --token $TEST_PYPI_TOKEN
+      - uv build
+      - uv publish --publish-url https://test.pypi.org/legacy/ --token $TEST_PYPI_TOKEN
 
   production-pypi-publish:
     desc: 'publish to pypi.org'
     prompt: 'Is it okay to publish this project to pypi.org?'
+    dotenv: ['.env']
     cmds:
-      - uv publish --env-file .env --token $UV_PUBLISH_TOKEN
+      - uv build
+      - uv publish
