@@ -1,0 +1,56 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: check master branch
+        id: verify-master
+        run: |
+          TAG_COMMIT=$(git rev-parse HEAD)
+          MASTER_COMMIT=$(git rev-parse origin/master)
+
+          echo "📛 タグのコミット: $TAG_COMMIT"
+          echo "🌿 masterの最新コミット: $MASTER_COMMIT"
+
+          if [ "$TAG_COMMIT" != "$MASTER_COMMIT" ]; then
+            echo "❌ このタグはmasterブランチのコミットではありません"
+            exit 1
+          fi
+
+      - name: tag vaidation
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ タグ '$TAG' は 'v1.2.3' 形式ではありませんでした"
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: 'pyproject.toml'
+
+      - name: Install the project
+        run: uv sync --all-groups
+
+      - name: uv build
+        run: uv build
+
+      - name: PyPI push
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.UV_PUBLISH_TOKEN }}
+        run: uv publish
