@@ -24,6 +24,18 @@ text、ini、json、yaml、tomlに対応。
 
 ## Install
 
+pip
+
+```
+pip install abara-file-io
+```
+
+uv
+
+```
+uv add abara-file-io
+```
+
 ## Usage
 
 ### ファイルの読み込み
@@ -83,7 +95,7 @@ write_toml(dict_data, path)
 常に文字コード `UTF-8` 、改行コード `\n` で保存されるのでWindowsで指定を忘れてしまうことがなく安全。  
 拡張子を `.bat` と `.cmd` にした場合のみ、 `UTF-8` では動作しないため自動的にShift-JIS（ `CP932` ）と `\r\n` で保存される。
 
-書き込みに失敗してもエラーで停止しない仕様。  
+書き込みに保存先パスの指定ミス等で処理が失敗してもエラーで停止しない仕様。  
 もし失敗時に何をさせたい場合、全ての関数は書き込みに成功したら `True` 、失敗したら `False` を返すので、必要に応じて処理を分岐させることができる。
 
 ## Licence
