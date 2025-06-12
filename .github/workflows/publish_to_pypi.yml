@@ -14,17 +14,10 @@ jobs:
 
       - name: check master branch
         id: verify-master
+        if: ${{ github.ref_name == 'master' }}
         run: |
-          TAG_COMMIT=$(git rev-parse HEAD)
-          MASTER_COMMIT=$(git rev-parse origin/master)
-
-          echo "📛 タグのコミット: $TAG_COMMIT"
-          echo "🌿 masterの最新コミット: $MASTER_COMMIT"
-
-          if [ "$TAG_COMMIT" != "$MASTER_COMMIT" ]; then
-            echo "❌ このタグはmasterブランチのコミットではありません"
-            exit 1
-          fi
+          echo "❌ このタグはmasterブランチのコミットではありません"
+          exit 1
 
       - name: tag vaidation
         run: |
